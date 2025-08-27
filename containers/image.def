@@ -3,7 +3,7 @@ From: julia:1.10-bullseye
 
 %post
     apt-get update && apt-get install -y git build-essential && rm -rf /var/lib/apt/lists/*
-    julia -e 'using Pkg; Pkg.add(["ITensors","ITensorMPS","ITensorCorrelators","ArgParse","JSON","DelimitedFiles","ProgressMeter"]); Pkg.precompile()'
+    julia -e 'using Pkg; Pkg.add(["ITensors","ITensorMPS","ITensorCorrelators","ArgParse","JSON","DelimitedFiles","ProgressMeter","Plots"]); Pkg.precompile()'
 
 %environment
     export JULIA_PROJECT=@.

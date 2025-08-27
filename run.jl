@@ -1,6 +1,8 @@
 
 #!/usr/bin/env julia
 using ArgParse, JSON, DelimitedFiles
+using Pkg; Pkg.activate(".")
+using BinderSim
 
 function parse_cli()
     s = ArgParseSettings()
@@ -19,11 +21,33 @@ function parse_cli()
 end
 
 function compute!(p::Dict)
-    # TODO: replace this placeholder with your simulation.
-    # for now we just compute a fake binder as a function of lambda
-    λx = p["lambda_x"]; λzz = p["lambda_zz"]; L = p["L"]
-    binder = 2/3 + 0.3*tanh( (λx-λzz) * L / 50 )
-    p["binder"] = binder
+    # Extract parameters
+    L = p["L"]
+    lambda_x = p["lambda_x"]
+    lambda_zz = p["lambda_zz"]
+    seed = get(p, "seed", 1234)
+    ntrials = get(p, "ntrials", 100)
+    maxdim = get(p, "maxdim", 256)
+    cutoff = get(p, "cutoff", 1e-12)
+    chunk4 = get(p, "chunk4", 50_000)
+    
+    println("Computing Binder parameter for L=$L, λₓ=$lambda_x, λ_zz=$lambda_zz, seed=$seed")
+    
+    # Run the actual simulation
+    result = ea_binder_mc(L; lambda_x=lambda_x, lambda_zz=lambda_zz, 
+                         ntrials=ntrials, maxdim=maxdim, cutoff=cutoff,
+                         chunk4=chunk4, seed=seed)
+    
+    # Store results in the parameter dictionary
+    p["binder"] = result.B
+    p["binder_mean_of_trials"] = result.B_mean_of_trials
+    p["binder_std_of_trials"] = result.B_std_of_trials
+    p["S2_bar"] = result.S2_bar
+    p["S4_bar"] = result.S4_bar
+    p["ntrials_completed"] = result.ntrials
+    
+    println("Binder parameter computed: B = $(result.B)")
+    
     return p
 end
 
