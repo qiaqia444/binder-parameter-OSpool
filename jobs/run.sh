@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-REPO_DIR="$(pwd)"
-SIF_PATH="${SIF_PATH:-$REPO_DIR/containers/container.sif}"
-APPT="${APPTAINER:-apptainer}"
-mkdir -p "$REPO_DIR/output"
-"$APPT" exec --bind "$REPO_DIR":/workdir "$SIF_PATH" \
-  julia --project=/workdir -t ${JULIA_NUM_THREADS:-1} /workdir/run.jl \
-    ${PARAMS_JSON:+--params "$PARAMS_JSON"} \
-    --outdir /workdir/output
+
+# Use the Julia available on the execution node
+JULIA_CMD="julia"
+
+# Set up Julia environment
+export JULIA_DEPOT_PATH="$(pwd)/.julia"
+mkdir -p "$JULIA_DEPOT_PATH"
+
+# Create project directory structure if needed
+mkdir -p output
+
+# Run the main simulation script
+$JULIA_CMD --project=. run.jl ${PARAMS_JSON:+--params "$PARAMS_JSON"} --outdir output

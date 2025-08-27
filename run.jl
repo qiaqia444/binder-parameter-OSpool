@@ -1,7 +1,25 @@
 
 #!/usr/bin/env julia
-using ArgParse, JSON, DelimitedFiles
 using Pkg; Pkg.activate(".")
+
+# Install packages if not available
+required_packages = ["ITensors", "ITensorMPS", "ITensorCorrelators", "ArgParse", "JSON", "DelimitedFiles", "Random", "Statistics"]
+
+println("Checking and installing required packages...")
+for pkg in required_packages
+    try
+        eval(Meta.parse("using $pkg"))
+        println("✓ $pkg already available")
+    catch
+        println("Installing $pkg...")
+        Pkg.add(pkg)
+        eval(Meta.parse("using $pkg"))
+        println("✓ $pkg installed and loaded")
+    end
+end
+
+# Add the src directory to load path
+push!(LOAD_PATH, joinpath(@__DIR__, "src"))
 using BinderSim
 
 function parse_cli()
