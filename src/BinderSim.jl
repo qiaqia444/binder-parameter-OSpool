@@ -3,7 +3,7 @@ module BinderSim
 using Random, Statistics
 using ITensors, ITensorMPS, ITensorCorrelators
 
-export ea_binder_mc, create_weak_measurement_operators, create_up_state_mps, evolve_one_trial, ea_binder_parameter
+export ea_binder_mc, create_weak_measurement_operators, create_up_state_mps, evolve_one_trial
 
 function create_weak_measurement_operators(sites, lambda_x::Float64, lambda_zz::Float64)
     WEAK_X_0 = Dict{Int,ITensor}()
@@ -72,44 +72,6 @@ function evolve_one_trial(L::Int; lambda_x::Float64, lambda_zz::Float64,
         end
     end
     return ψ, sites
-end
-
-# EA Binder with ITensorCorrelators (Spin-1/2 → use "Sz")
-# B = 1 - S4/(3*S2^2),  S2=∑⟨Sz_i Sz_j⟩^2,  S4=∑⟨Sz_i Sz_j Sz_k Sz_l⟩^2
-function ea_binder_parameter(ψ::MPS, sites; tol::Float64=1e-12,
-                             chunk4::Int=50_000, eps::Float64=1e-30)
-    L = length(sites)
-
-    # 2-point
-    pairs = [(i,j) for i in 1:L for j in 1:L]
-    c2 = correlator(ψ, ("Sz","Sz"), pairs)
-    S2 = 0.0
-    for (i,j) in pairs
-        v = real(c2[(i,j)])
-        S2 += v*v
-    end
-
-    # 4-point (chunked)
-    S4 = 0.0
-    buf = NTuple{4,Int}[]
-    function flush!()
-        isempty(buf) && return
-        c4 = correlator(ψ, ("Sz","Sz","Sz","Sz"), buf)
-        for key in buf
-            v = real(c4[key])
-            S4 += v*v
-        end
-        empty!(buf)
-    end
-    for i in 1:L, j in 1:L, k in 1:L, l in 1:L
-        push!(buf, (i,j,k,l))
-        if length(buf) >= chunk4; flush!(); end
-    end
-    flush!()
-
-    denom = max(3.0*S2*S2, eps)
-    B = 1.0 - S4/denom
-    return B
 end
 
 function ea_binder_mc(L::Int; lambda_x::Float64, lambda_zz::Float64,

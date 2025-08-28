@@ -43,11 +43,6 @@ show_usage() {
 COMMAND=${1:-help}
 
 case $COMMAND in
-    "test")
-        echo "Testing simulation locally..."
-        $JULIA_PATH test_local.jl
-        ;;
-        
     "params")
         shift  # Remove 'params' from arguments
         echo "Generating parameter files..."
@@ -121,12 +116,9 @@ case $COMMAND in
         ;;
         
     "all")
-        echo "Running complete workflow (test + params generation)..."
+        echo "Running complete workflow (parameter generation)..."
         echo
-        echo "Step 1: Testing simulation locally..."
-        $JULIA_PATH test_local.jl
-        echo
-        echo "Step 2: Generating parameter files..."
+        echo "Generating parameter files..."
         mkdir -p jobs logs output
         $JULIA_PATH jobs/make_params.jl
         echo

@@ -38,12 +38,6 @@ show_usage() {
 COMMAND=${1:-help}
 
 case $COMMAND in
-    "test")
-        echo "Testing simulation locally..."
-        echo "Note: This requires Julia to be available on the login node"
-        $JULIA_PATH test_local.jl
-        ;;
-        
     "params")
         shift  # Remove 'params' from arguments
         echo "Generating parameter files..."
@@ -119,14 +113,7 @@ case $COMMAND in
     "all")
         echo "Running complete workflow (test + params generation)..."
         echo
-        echo "Step 1: Testing simulation locally..."
-        if command -v julia &> /dev/null; then
-            $JULIA_PATH test_local.jl
-        else
-            echo "Julia not available on login node - skipping local test"
-        fi
-        echo
-        echo "Step 2: Generating parameter files..."
+        echo "Generating parameter files..."
         mkdir -p jobs logs output
         $JULIA_PATH jobs/make_params.jl
         echo
