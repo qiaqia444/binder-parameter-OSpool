@@ -79,11 +79,6 @@ function main()
     seed0 = args["seed"]
     out = args["out"]
     
-    println("Generated λ values: ", lambdas)
-    println("System sizes L: ", Ls)
-    println("Trials per job: ", ntrials)
-    println("Samples per (L,λ): ", samples)
-    
     open(out, "w") do io
         idx = 0
         for L in Ls, λ in lambdas, s in 1:samples

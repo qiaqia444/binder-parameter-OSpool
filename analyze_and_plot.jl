@@ -165,16 +165,13 @@ function print_results_summary(processed_data)
     
     L_values = sort(unique([data.L for data in values(processed_data)]))
     
-    println("\n" * "="^80)
-    println("BINDER PARAMETER RESULTS SUMMARY")
-    println("="^80)
+    println("\nBINDER PARAMETER RESULTS SUMMARY")
     
     for L in L_values
         L_data = [data for data in values(processed_data) if data.L == L]
         sort!(L_data, by = x -> x.lambda)
         
         println("\nL = $L:")
-        println("-"^40)
         
         for data in L_data
             λ = data.lambda
@@ -186,11 +183,7 @@ function print_results_summary(processed_data)
         end
     end
     
-    println("\n" * "="^80)
-    
-    # Find transition region (around λ = 0.5)
-    println("TRANSITION REGION ANALYSIS (λ ∈ [0.4, 0.6]):")
-    println("-"^50)
+    println("\nTRANSITION REGION ANALYSIS (λ ∈ [0.4, 0.6]):")
     
     for L in L_values
         transition_data = [data for data in values(processed_data) 

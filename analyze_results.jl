@@ -49,9 +49,7 @@ function analyze_results(results)
     
     # Calculate statistics for each (L, lambda) pair
     println("\nResults Summary:")
-    println("="^80)
     println("L\tλ\tBinder\t\tStd\t\tN_samples")
-    println("="^80)
     
     summary_data = []
     for ((L, λ), group) in sort(collect(grouped))
