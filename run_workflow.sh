@@ -11,7 +11,7 @@ if [ ! -f "Project.toml" ] || [ ! -d "src" ]; then
 fi
 
 # Set Julia path
-JULIA_PATH="/Applications/Julia-1.11.app/Contents/Resources/julia/bin/julia"
+JULIA_PATH="julia"
 if [ ! -f "$JULIA_PATH" ]; then
     echo "Error: Julia not found at $JULIA_PATH"
     echo "Please update JULIA_PATH in this script to point to your Julia installation"

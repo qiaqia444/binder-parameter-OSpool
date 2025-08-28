@@ -1,16 +1,20 @@
 universe                = vanilla
 executable              = jobs/run.sh
+arguments		= $(params)
+
 log                     = logs/$(Cluster).log
 output                  = logs/$(Cluster).$(Process).out
 error                   = logs/$(Cluster).$(Process).err
-request_cpus            = 1
-request_memory          = 8 GB
-request_disk            = 4 GB
-+JobDurationCategory    = "Long"
+request_cpus            = 4
+request_memory          = 4 GB
+request_disk            = 1 GB
++JobDurationCategory    = "Medium"
 #+ProjectName            = "qia.wang"
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
 transfer_input_files    = src/, run.jl, Project.toml, Manifest.toml
-requirements            = (HAS_JULIA =?= TRUE)
+container_image 	= osdf:///ospool/ap40/data/qia.wang/container.sif
+
 queue params from jobs/params.txt
 environment             = "PARAMS_JSON=$(params)"
