@@ -20,8 +20,18 @@ fi
 
 echo "Using container runtime: $SINGULARITY_CMD"
 
-# Use Singularity container with Julia
-CONTAINER_PATH="/ospool/ap40/data/qia.wang/container.sif"
+# Use transferred container file (transferred as part of job)
+CONTAINER_PATH="./container.sif"
+
+# Check if container file exists
+if [ ! -f "$CONTAINER_PATH" ]; then
+    echo "ERROR: Container file not found at $CONTAINER_PATH"
+    echo "Current directory contents:"
+    ls -la
+    exit 1
+fi
+
+echo "Using container: $CONTAINER_PATH"
 
 # Create project directory structure if needed
 mkdir -p output
