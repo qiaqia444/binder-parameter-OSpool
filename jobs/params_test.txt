@@ -1,3 +1,1 @@
---L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --maxdim 64 --cutoff 1.0e-12 --ntrials 100 --chunk4 1000 --seed 1235 --sample 1 --out_prefix L8_lam0.1_s1 --outdir output
---L 8 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --maxdim 64 --cutoff 1.0e-12 --ntrials 100 --chunk4 1000 --seed 1236 --sample 1 --out_prefix L8_lam0.5_s1 --outdir output
---L 8 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --maxdim 64 --cutoff 1.0e-12 --ntrials 100 --chunk4 1000 --seed 1237 --sample 1 --out_prefix L8_lam0.9_s1 --outdir output
+--L 4 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --maxdim 32 --cutoff 1.0e-8 --ntrials 10 --chunk4 100 --seed 1235 --sample 1 --out_prefix test_L4_lam0.5_s1 --outdir output

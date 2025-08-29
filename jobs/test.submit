@@ -16,10 +16,10 @@ log                   = logs/test_$(Cluster).log
 
 +JobDurationCategory = "Medium"
 
-# Resources (smaller for test)
+# Resources (minimal for test)
 request_cpus          = 1
-request_memory        = 2 GB
-request_disk          = 1GB
+request_memory        = 1 GB
+request_disk          = 500MB
 
 # Use your container
 container_image = /ospool/ap40/data/qia.wang/container.sif
