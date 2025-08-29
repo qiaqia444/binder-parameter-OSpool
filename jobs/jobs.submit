@@ -1,20 +1,28 @@
-universe                = vanilla
-executable              = jobs/run.sh
-arguments		= $(params)
+universe              = vanilla
+executable            = jobs/run.sh
+arguments             = $(params)
 
-log                     = logs/$(Cluster).log
-output                  = logs/$(Cluster).$(Process).out
-error                   = logs/$(Cluster).$(Process).err
-request_cpus            = 4
-request_memory          = 4 GB
-request_disk            = 1 GB
-+JobDurationCategory    = "Medium"
-#+ProjectName            = "qia.wang"
+# Send only what the job needs
+transfer_input_files  = jobs, src, Project.toml, Manifest.toml, run.jl
+
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_output_files   = output
-transfer_input_files    = src/, run.jl, Project.toml, Manifest.toml
-container_image 	= osdf:///ospool/ap40/data/qia.wang/container.sif
 
-queue params from jobs/params.txt
-environment             = "PARAMS_JSON=$(params)"
+# Logs (on submit node)
+output                = logs/$(Cluster).$(Process).out
+error                 = logs/$(Cluster).$(Process).err
+log                   = logs/$(Cluster).log
+
++JobDurationCategory = "Medium"
+
+# Resources (production)
+request_cpus          = 4
+request_memory        = 4 GB
+request_disk          = 4GB
+
+# Use your container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# Production jobs from production params file
+queue params from jobs/params_production.txt
