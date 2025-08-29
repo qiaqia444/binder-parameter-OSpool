@@ -1,5 +1,6 @@
 .DS_Store
 status
-status
 /output/
 /logs/
+/containers/*.sif
+*.sif

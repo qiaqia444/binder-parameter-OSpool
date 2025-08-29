@@ -1,7 +1,5 @@
 universe                = vanilla
 executable              = jobs/run.sh
-arguments		= $(params)
-
 log                     = logs/$(Cluster).log
 output                  = logs/$(Cluster).$(Process).out
 error                   = logs/$(Cluster).$(Process).err
@@ -12,9 +10,7 @@ request_disk            = 1 GB
 #+ProjectName            = "qia.wang"
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-transfer_output_files   = output
 transfer_input_files    = src/, run.jl, Project.toml, Manifest.toml
-container_image 	= osdf:///ospool/ap40/data/qia.wang/container.sif
-
-queue params from jobs/params.txt
+requirements            = (HAS_JULIA =?= TRUE)
 environment             = "PARAMS_JSON=$(params)"
+queue params from jobs/params.txt
