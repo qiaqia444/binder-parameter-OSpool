@@ -29,5 +29,11 @@ From: julia:1.11
     julia --project=. -e 'using ITensors; println("✓ ITensors loaded"); using ITensorMPS; println("✓ ITensorMPS loaded"); using ITensorCorrelators; println("✓ ITensorCorrelators loaded"); using ArgParse, JSON; println("✓ All packages loaded successfully!")'
 
 %environment
-    export JULIA_DEPOT_PATH="/opt/julia"
+    # Use /tmp for Julia depot at runtime (writable)
+    export JULIA_DEPOT_PATH="/tmp/julia:/opt/julia"
     export JULIA_PROJECT="/opt/project"
+
+%runscript
+    # Set up writable Julia depot in /tmp
+    mkdir -p /tmp/julia
+    exec "$@"
