@@ -39,7 +39,26 @@ mkdir -p .julia_local
 
 # Set up environment for writable Julia depot
 export JULIA_DEPOT_PATH="$(pwd)/.julia_local:/tmp/julia"
+ORIGINAL_DIR=$(pwd)
 
-# All arguments are passed directly to Julia
-# HTCondor will pass them as individual arguments
-$SINGULARITY_CMD exec --bind $(pwd):/work --pwd /work $CONTAINER_PATH julia --project=. run.jl "$@"
+# Try different Singularity execution methods
+echo "Attempting to run container..."
+
+# Method 1: Try with --fakeroot (works better on some systems)
+if $SINGULARITY_CMD exec --fakeroot --bind $(pwd):/work --pwd /work $CONTAINER_PATH julia --version >/dev/null 2>&1; then
+    echo "Using fakeroot mode"
+    $SINGULARITY_CMD exec --fakeroot --bind $(pwd):/work --pwd /work $CONTAINER_PATH julia --project=. run.jl "$@"
+# Method 2: Try standard execution
+elif $SINGULARITY_CMD exec --bind $(pwd):/work --pwd /work $CONTAINER_PATH julia --version >/dev/null 2>&1; then
+    echo "Using standard mode"
+    $SINGULARITY_CMD exec --bind $(pwd):/work --pwd /work $CONTAINER_PATH julia --project=. run.jl "$@"
+# Method 3: Try without bind mounts
+else
+    echo "Trying without bind mounts"
+    WORK_DIR="/tmp/job_work_$$"
+    mkdir -p $WORK_DIR
+    cp -r * $WORK_DIR/
+    cd $WORK_DIR
+    $SINGULARITY_CMD exec $CONTAINER_PATH julia --project=. run.jl "$@"
+    cp -r output $ORIGINAL_DIR/
+fi

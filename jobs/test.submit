@@ -11,6 +11,6 @@ request_disk            = 2 GB
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files    = src/, run.jl, Project.toml, Manifest.toml, /ospool/ap40/data/qia.wang/container.sif
-requirements            = (HAS_SINGULARITY =?= TRUE) && (OpSysMajorVer =?= 7 || OpSysMajorVer =?= 8 || OpSysMajorVer =?= 9)
+requirements            = (HAS_SINGULARITY =?= TRUE) && (HAS_FUSE =?= TRUE) && (OpSysMajorVer =?= 7 || OpSysMajorVer =?= 8 || OpSysMajorVer =?= 9)
 arguments               = --L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --maxdim 64 --cutoff 1.0e-12 --ntrials 10 --chunk4 1000 --seed 1235 --sample 1 --out_prefix test_L8_lam0.1_s1 --outdir output
 queue
