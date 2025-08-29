@@ -16,13 +16,14 @@ From: julia:1.11
 
     # Set up Julia environment
     export JULIA_DEPOT_PATH="/opt/julia"
+    mkdir -p /opt/julia
     
-    # Install Julia packages in the project environment
+    # Install Julia packages in the project environment first
     cd /opt/project
-    julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+    julia --project=. -e 'using Pkg; println("Installing project packages..."); Pkg.instantiate(); Pkg.precompile(); println("Project packages installed successfully!")'
     
-    # Also install packages globally as backup
-    julia -e 'using Pkg; Pkg.add(["ITensors", "ITensorMPS", "ITensorCorrelators", "ArgParse", "JSON", "DelimitedFiles", "Random", "Statistics"]); Pkg.precompile()'
+    # Test that packages load correctly
+    julia --project=. -e 'using ITensors, ITensorMPS, ITensorCorrelators, ArgParse, JSON; println("All packages loaded successfully!")'
 
 %environment
     export JULIA_DEPOT_PATH="/opt/julia"
