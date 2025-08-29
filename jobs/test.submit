@@ -12,5 +12,5 @@ should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files    = src/, run.jl, Project.toml, Manifest.toml
 requirements            = (HAS_SINGULARITY =?= TRUE)
-environment             = "PARAMS_JSON=$(params)"
+arguments               = $(params)
 queue params from jobs/test_params.txt

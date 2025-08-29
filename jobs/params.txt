@@ -1,3 +1,3 @@
-{\"chunk4\":50000,\"lambda_x\":0.1,\"L\":12,\"lambda_zz\":0.9,\"cutoff\":1.0e-12,\"lambda\":0.1,\"maxdim\":256,\"sample\":1,\"out_prefix\":\"L12_lam0.1_s1\",\"ntrials\":1000,\"seed\":1235}
-{\"chunk4\":50000,\"lambda_x\":0.1,\"L\":12,\"lambda_zz\":0.9,\"cutoff\":1.0e-12,\"lambda\":0.1,\"maxdim\":256,\"sample\":2,\"out_prefix\":\"L12_lam0.1_s2\",\"ntrials\":1000,\"seed\":1236}
-{\"chunk4\":50000,\"lambda_x\":0.1,\"L\":12,\"lambda_zz\":0.9,\"cutoff\":1.0e-12,\"lambda\":0.1,\"maxdim\":256,\"sample\":3,\"out_prefix\":\"L12_lam0.1_s3\",\"ntrials\":1000,\"seed\":1237}
+{"chunk4":50000,"lambda_x":0.1,"L":12,"lambda_zz":0.9,"cutoff":1.0e-12,"lambda":0.1,"maxdim":256,"sample":1,"out_prefix":"L12_lam0.1_s1","ntrials":1000,"seed":1235}
+{"chunk4":50000,"lambda_x":0.1,"L":12,"lambda_zz":0.9,"cutoff":1.0e-12,"lambda":0.1,"maxdim":256,"sample":2,"out_prefix":"L12_lam0.1_s2","ntrials":1000,"seed":1236}
+{"chunk4":50000,"lambda_x":0.1,"L":12,"lambda_zz":0.9,"cutoff":1.0e-12,"lambda":0.1,"maxdim":256,"sample":3,"out_prefix":"L12_lam0.1_s3","ntrials":1000,"seed":1237}
