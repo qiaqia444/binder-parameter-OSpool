@@ -1,0 +1,4 @@
+# This is a sample - run 'julia jobs/make_params.jl' on cluster to generate all 255 jobs
+--L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --maxdim 256 --cutoff 1.0e-12 --ntrials 1000 --chunk4 50000 --seed 1235 --sample 1 --out_prefix L12_lam0.1_s1 --outdir output
+--L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --maxdim 256 --cutoff 1.0e-12 --ntrials 1000 --chunk4 50000 --seed 1236 --sample 2 --out_prefix L12_lam0.1_s2 --outdir output
+--L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --maxdim 256 --cutoff 1.0e-12 --ntrials 1000 --chunk4 50000 --seed 1237 --sample 3 --out_prefix L12_lam0.1_s3 --outdir output
