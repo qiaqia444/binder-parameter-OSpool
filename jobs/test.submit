@@ -1,0 +1,16 @@
+universe                = vanilla
+executable              = jobs/run.sh
+log                     = logs/test_$(Cluster).log
+output                  = logs/test_$(Cluster).$(Process).out
+error                   = logs/test_$(Cluster).$(Process).err
+request_cpus            = 2
+request_memory          = 2 GB
+request_disk            = 1 GB
++JobDurationCategory    = "Short"
+#+ProjectName            = "qia.wang"
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files    = src/, run.jl, Project.toml, Manifest.toml
+requirements            = (HAS_SINGULARITY =?= TRUE)
+environment             = "PARAMS_JSON=$(params)"
+queue params from jobs/test_params.txt
