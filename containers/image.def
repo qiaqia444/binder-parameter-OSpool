@@ -12,18 +12,21 @@ From: julia:1.11
             git \
             cmake \
             g++ \
-            build-essential
+            build-essential \
+            ca-certificates
 
     # Set up Julia environment
     export JULIA_DEPOT_PATH="/opt/julia"
     mkdir -p /opt/julia
     
-    # Install Julia packages in the project environment first
+    # Install Julia packages in the project environment
     cd /opt/project
-    julia --project=. -e 'using Pkg; println("Installing project packages..."); Pkg.instantiate(); Pkg.precompile(); println("Project packages installed successfully!")'
+    echo "Installing packages from Manifest.toml..."
+    julia --project=. -e 'using Pkg; println("Julia version: ", VERSION); println("Installing packages..."); Pkg.instantiate(); println("Precompiling..."); Pkg.precompile(); println("Done!")'
     
     # Test that packages load correctly
-    julia --project=. -e 'using ITensors, ITensorMPS, ITensorCorrelators, ArgParse, JSON; println("All packages loaded successfully!")'
+    echo "Testing package loading..."
+    julia --project=. -e 'using ITensors; println("✓ ITensors loaded"); using ITensorMPS; println("✓ ITensorMPS loaded"); using ITensorCorrelators; println("✓ ITensorCorrelators loaded"); using ArgParse, JSON; println("✓ All packages loaded successfully!")'
 
 %environment
     export JULIA_DEPOT_PATH="/opt/julia"
