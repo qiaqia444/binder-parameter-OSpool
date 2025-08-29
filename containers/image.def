@@ -2,8 +2,8 @@ Bootstrap: docker
 From: julia:1.11
 
 %files
-   Project.toml /opt/julia/environments/v1.11/
-   Manifest.toml /opt/julia/environments/v1.11/
+   Project.toml /opt/project/
+   Manifest.toml /opt/project/
 
 %post
     # Install any needed system packages first
@@ -11,11 +11,19 @@ From: julia:1.11
     apt-get install -y wget \
             git \
             cmake \
-            g++
+            g++ \
+            build-essential
 
-    # Install Julia packages
+    # Set up Julia environment
     export JULIA_DEPOT_PATH="/opt/julia"
-    julia -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+    
+    # Install Julia packages in the project environment
+    cd /opt/project
+    julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+    
+    # Also install packages globally as backup
+    julia -e 'using Pkg; Pkg.add(["ITensors", "ITensorMPS", "ITensorCorrelators", "ArgParse", "JSON", "DelimitedFiles", "Random", "Statistics"]); Pkg.precompile()'
 
 %environment
-    export JULIA_DEPOT_PATH=":/opt/Julia"
+    export JULIA_DEPOT_PATH="/opt/julia"
+    export JULIA_PROJECT="/opt/project"
