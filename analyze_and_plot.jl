@@ -8,7 +8,7 @@ using Pkg; Pkg.activate(".")
 using JSON, Statistics, DelimitedFiles
 using Plots
 
-function load_simulation_results(output_dir="binder-simulation-results/output")
+function load_simulation_results(output_dir="output")
     """Load all JSON result files from the simulation"""
     
     if !isdir(output_dir)
@@ -126,8 +126,11 @@ function create_binder_plots(processed_data)
         end
     end
     
+    # Create analysis_results directory if it doesn't exist
+    mkpath("analysis_results")
+    
     # Save the plot
-    savefig(plt_combined, "binder_vs_lambda_combined.png")
+    savefig(plt_combined, "analysis_results/binder_vs_lambda_combined.png")
     
     # Create individual plots for each L
     for L in L_values
@@ -154,7 +157,7 @@ function create_binder_plots(processed_data)
               color=:blue, label="L = $L",
               yerror=errors)
         
-        savefig(plt_L, "binder_vs_lambda_L$(L).png")
+        savefig(plt_L, "analysis_results/binder_vs_lambda_L$(L).png")
     end
     
     return plt_combined
@@ -202,8 +205,11 @@ function print_results_summary(processed_data)
     end
 end
 
-function save_results_csv(processed_data, filename="binder_results_summary.csv")
+function save_results_csv(processed_data, filename="analysis_results/binder_results_summary.csv")
     """Save results to CSV file for further analysis"""
+    
+    # Create analysis_results directory if it doesn't exist
+    mkpath("analysis_results")
     
     # Convert to matrix format
     data_rows = []
@@ -268,6 +274,10 @@ function main()
     save_results_csv(processed_data)
     
     println("Analysis complete.")
+    println("Files created in analysis_results/:")
+    println("  - binder_vs_lambda_combined.png")
+    println("  - binder_vs_lambda_L*.png (individual system sizes)")
+    println("  - binder_results_summary.csv")
 end
 
 if !isinteractive()

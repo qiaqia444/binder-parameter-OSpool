@@ -4,3 +4,4 @@ status
 /logs/
 /containers/*.sif
 *.sif
+/analysis_results/
