@@ -2,8 +2,8 @@ Bootstrap: docker
 From: julia:1.11
 
 %files
-   ../Project.toml /opt/julia/environments/v1.11/
-   ../Manifest.toml /opt/julia/environments/v1.11/
+   Project.toml /opt/julia/environments/v1.11/
+   Manifest.toml /opt/julia/environments/v1.11/
 
 %post
     # Install any needed system packages first
