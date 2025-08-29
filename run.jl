@@ -22,32 +22,77 @@ end
 push!(LOAD_PATH, joinpath(@__DIR__, "src"))
 using BinderSim
 
-function parse_cli()
-    s = ArgParseSettings()
+function build_parser()
+    s = ArgParseSettings(; description = "Run Binder parameter calculation and save results as JSON.")
     @add_arg_table s begin
-        "--params"
-            help = "JSON object with parameters"
-            default = ""
-        "--params-file"
-            help = "File with one JSON object per line"
-            default = ""
+        "--L"
+            help = "System size"
+            arg_type = Int
+            required = true
+        "--lambda_x"
+            help = "Parameter lambda_x"
+            arg_type = Float64
+            required = true
+        "--lambda_zz"
+            help = "Parameter lambda_zz" 
+            arg_type = Float64
+            required = true
+        "--lambda"
+            help = "Parameter lambda (alternative to lambda_x)"
+            arg_type = Float64
+            default = 0.1
+        "--maxdim"
+            help = "Maximum bond dimension"
+            arg_type = Int
+            default = 256
+        "--cutoff"
+            help = "SVD cutoff"
+            arg_type = Float64
+            default = 1e-12
+        "--ntrials"
+            help = "Number of Monte Carlo trials"
+            arg_type = Int
+            default = 1000
+        "--chunk4"
+            help = "Chunk size for S4 calculation"
+            arg_type = Int
+            default = 50000
+        "--seed"
+            help = "Random seed"
+            arg_type = Int
+            default = 1234
+        "--sample"
+            help = "Sample number (for output filename)"
+            arg_type = Int
+            default = 1
+        "--out_prefix"
+            help = "Output filename prefix"
+            arg_type = String
+            default = "result"
         "--outdir"
-            help = "Directory to write outputs"
+            help = "Output directory"
+            arg_type = String
             default = "output"
     end
-    return parse_args(s)
+    return s
 end
 
-function compute!(p::Dict)
+function main(args)
+    opts = parse_args(args, build_parser())
+    
     # Extract parameters
-    L = p["L"]
-    lambda_x = p["lambda_x"]
-    lambda_zz = p["lambda_zz"]
-    seed = get(p, "seed", 1234)
-    ntrials = get(p, "ntrials", 100)
-    maxdim = get(p, "maxdim", 256)
-    cutoff = get(p, "cutoff", 1e-12)
-    chunk4 = get(p, "chunk4", 50_000)
+    L = opts["L"]
+    lambda_x = opts["lambda_x"]
+    lambda_zz = opts["lambda_zz"]
+    lambda = opts["lambda"]
+    maxdim = opts["maxdim"]
+    cutoff = opts["cutoff"]
+    ntrials = opts["ntrials"]
+    chunk4 = opts["chunk4"]
+    seed = opts["seed"]
+    sample = opts["sample"]
+    out_prefix = opts["out_prefix"]
+    outdir = opts["outdir"]
     
     println("Computing Binder parameter for L=$L, λₓ=$lambda_x, λ_zz=$lambda_zz, seed=$seed")
     
@@ -56,41 +101,36 @@ function compute!(p::Dict)
                          ntrials=ntrials, maxdim=maxdim, cutoff=cutoff,
                          chunk4=chunk4, seed=seed)
     
-    # Store results in the parameter dictionary
-    p["binder"] = result.B
-    p["binder_mean_of_trials"] = result.B_mean_of_trials
-    p["binder_std_of_trials"] = result.B_std_of_trials
-    p["S2_bar"] = result.S2_bar
-    p["S4_bar"] = result.S4_bar
-    p["ntrials_completed"] = result.ntrials
+    # Prepare output data
+    output_data = Dict(
+        "L" => L,
+        "lambda_x" => lambda_x,
+        "lambda_zz" => lambda_zz,
+        "lambda" => lambda,
+        "maxdim" => maxdim,
+        "cutoff" => cutoff,
+        "ntrials" => ntrials,
+        "chunk4" => chunk4,
+        "seed" => seed,
+        "sample" => sample,
+        "out_prefix" => out_prefix,
+        "binder" => result.B,
+        "binder_mean_of_trials" => result.B_mean_of_trials,
+        "binder_std_of_trials" => result.B_std_of_trials,
+        "S2_bar" => result.S2_bar,
+        "S4_bar" => result.S4_bar,
+        "ntrials_completed" => result.ntrials
+    )
     
     println("Binder parameter computed: B = $(result.B)")
     
-    return p
-end
-
-function run_one(json_str::AbstractString, outdir::AbstractString)
-    p = JSON.parse(json_str)
-    res = compute!(p)
+    # Save results
     mkpath(outdir)
-    outfile = joinpath(outdir, string(p["out_prefix"], ".json"))
+    outfile = joinpath(outdir, "$(out_prefix).json")
     open(outfile, "w") do io
-        JSON.print(io, res)
+        JSON.print(io, output_data)
     end
     println("Wrote ", outfile)
 end
 
-function main()
-    args = parse_cli()
-    if args["params"] != ""
-        run_one(args["params"], args["outdir"])
-    elseif args["params_file"] != ""
-        for line in eachline(args["params_file"])
-            run_one(line, args["outdir"])
-        end
-    else
-        error("Provide --params JSON or --params-file")
-    end
-end
-
-isinteractive() || main()
+main(ARGS)
