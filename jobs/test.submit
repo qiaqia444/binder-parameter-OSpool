@@ -19,7 +19,7 @@ log                   = logs/test_$(Cluster).log
 # Resources (minimal for test)
 request_cpus          = 1
 request_memory        = 1 GB
-request_disk          = 500MB
+request_disk          = 2GB
 
 # Use your container
 container_image = /ospool/ap40/data/qia.wang/container.sif
