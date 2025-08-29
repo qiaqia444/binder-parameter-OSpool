@@ -1,1 +1,1 @@
-{"chunk4":1000,"lambda_x":0.1,"L":8,"lambda_zz":0.9,"cutoff":1.0e-12,"lambda":0.1,"maxdim":64,"sample":1,"out_prefix":"test_L8_lam0.1_s1","ntrials":10,"seed":1235}
+{\"chunk4\":1000,\"lambda_x\":0.1,\"L\":8,\"lambda_zz\":0.9,\"cutoff\":1.0e-12,\"lambda\":0.1,\"maxdim\":64,\"sample\":1,\"out_prefix\":\"test_L8_lam0.1_s1\",\"ntrials\":10,\"seed\":1235}
