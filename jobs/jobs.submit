@@ -1,9 +1,9 @@
 universe              = vanilla
-executable            = jobs/run.sh
+executable            = run.sh
 arguments             = $(params)
 
 # Send only what the job needs
-transfer_input_files  = jobs, src, Project.toml, Manifest.toml, run.jl
+transfer_input_files  = ../src, ../Project.toml, ../Manifest.toml, ../run_standard.jl
 
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
