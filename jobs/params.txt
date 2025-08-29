@@ -1,2 +1,0 @@
---L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --maxdim 64 --cutoff 1.0e-12 --ntrials 100 --chunk4 1000 --seed 1235 --sample 1 --out_prefix test_L8_lam0.1_s1 --outdir output
---L 8 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --maxdim 64 --cutoff 1.0e-12 --ntrials 100 --chunk4 1000 --seed 1236 --sample 1 --out_prefix test_L8_lam0.3_s1 --outdir output
