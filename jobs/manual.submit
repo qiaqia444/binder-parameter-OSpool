@@ -2,7 +2,7 @@
 # Using MANUAL correlators (bypassing ITensorCorrelators)
 # For L = [8, 10, 12] comprehensive study
 
-executable = run.sh
+executable = run_smart.sh
 arguments = $(L) $(lambda_x) $(lambda_zz) $(lambda) $(ntrials) $(seed) $(sample) $(out_prefix)
 
 # Resource requirements - manual correlators need more memory
