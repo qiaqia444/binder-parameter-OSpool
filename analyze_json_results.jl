@@ -205,23 +205,26 @@ function main()
         println("\nCreating plots...")
         plots = plot_available_data(stats_data)
         
+        # Create analysis_results directory if it doesn't exist
+        mkpath("analysis_results")
+        
         if plots isa Tuple
             p1, p2 = plots
-            savefig(p1, "binder_parameter_results.png")
+            savefig(p1, "analysis_results/binder_parameter_results.png")
             if p2 !== nothing
-                savefig(p2, "binder_critical_region.png")
-                println("Plots saved: binder_parameter_results.png, binder_critical_region.png")
+                savefig(p2, "analysis_results/binder_critical_region.png")
+                println("Plots saved: analysis_results/binder_parameter_results.png, analysis_results/binder_critical_region.png")
             else
-                println("Plot saved: binder_parameter_results.png")
+                println("Plot saved: analysis_results/binder_parameter_results.png")
             end
         else
-            savefig(plots, "binder_parameter_results.png")
-            println("Plot saved: binder_parameter_results.png")
+            savefig(plots, "analysis_results/binder_parameter_results.png")
+            println("Plot saved: analysis_results/binder_parameter_results.png")
         end
         
         # Save processed data
-        CSV.write("binder_statistics.csv", stats_data)
-        println("Statistics saved to: binder_statistics.csv")
+        CSV.write("analysis_results/binder_statistics.csv", stats_data)
+        println("Statistics saved to: analysis_results/binder_statistics.csv")
     end
     
     println("\n" * "="^60)

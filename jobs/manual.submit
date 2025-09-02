@@ -29,4 +29,4 @@ request_disk          = 4GB
 container_image = /ospool/ap40/data/qia.wang/container.sif
 
 # Input parameters from file
-queue L, lambda_x, lambda_zz, lambda, ntrials, seed, sample, out_prefix from ../params_manual_L8_10_12.txt
+queue L, lambda_x, lambda_zz, lambda, ntrials, seed, sample, out_prefix from params_manual_L8_10_12.txt

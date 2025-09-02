@@ -41,7 +41,7 @@ function main()
     println("Total jobs: $total_jobs")
     
     # Create parameter file for manual correlators
-    open("params_manual_L8_10_12.txt", "w") do f
+    open("jobs/params_manual_L8_10_12.txt", "w") do f
         job_count = 0
         for L in Ls
             for lambda in lambdas

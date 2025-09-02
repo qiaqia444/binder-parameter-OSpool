@@ -184,19 +184,22 @@ function main()
     println("\nCreating plots...")
     p1, p2, p3 = plot_phase_transition(stats_data)
     
+    # Create analysis_results directory if it doesn't exist
+    mkpath("analysis_results")
+    
     # Save plots
-    savefig(p1, "binder_parameter_L8_10_12.png")
-    savefig(p2, "binder_critical_region.png")
-    savefig(p3, "finite_size_scaling.png")
-    println("Plots saved: binder_parameter_L8_10_12.png, binder_critical_region.png, finite_size_scaling.png")
+    savefig(p1, "analysis_results/binder_parameter_L8_10_12.png")
+    savefig(p2, "analysis_results/binder_critical_region.png")
+    savefig(p3, "analysis_results/finite_size_scaling.png")
+    println("Plots saved: analysis_results/binder_parameter_L8_10_12.png, analysis_results/binder_critical_region.png, analysis_results/finite_size_scaling.png")
     
     # Analysis
     find_critical_point(stats_data)
     print_summary_table(stats_data)
     
     # Save processed data
-    CSV.write("binder_statistics_L8_10_12.csv", stats_data)
-    println("\nProcessed statistics saved to: binder_statistics_L8_10_12.csv")
+    CSV.write("analysis_results/binder_statistics_L8_10_12.csv", stats_data)
+    println("\nProcessed statistics saved to: analysis_results/binder_statistics_L8_10_12.csv")
     
     println("\n" * "="^60)
     println("ANALYSIS COMPLETE!")
