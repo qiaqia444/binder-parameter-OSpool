@@ -19,11 +19,11 @@ extract_archive() {
     local archive_path="${DOWNLOADED_DIR}/${archive_name}"
     
     if [[ ! -f "$archive_path" ]]; then
-        echo "❌ Archive not found: $archive_path"
+        echo "ERROR: Archive not found: $archive_path"
         return 1
     fi
     
-    echo "📦 Extracting: $archive_name"
+    echo "Extracting: $archive_name"
     
     # Create temporary extraction directory
     local temp_dir="temp_extract_$$"
@@ -34,25 +34,25 @@ extract_archive() {
     
     # Move extracted files to appropriate directories
     if [[ -d "$temp_dir/jobs/output" ]]; then
-        echo "  → Moving simulation results to $OUTPUT_DIR/"
+        echo "  - Moving simulation results to $OUTPUT_DIR/"
         mkdir -p "$OUTPUT_DIR"
         cp -r "$temp_dir/jobs/output/"* "$OUTPUT_DIR/" 2>/dev/null || true
     fi
     
     if [[ -d "$temp_dir/output" ]]; then
-        echo "  → Moving simulation results to $OUTPUT_DIR/"
+        echo "  - Moving simulation results to $OUTPUT_DIR/"
         mkdir -p "$OUTPUT_DIR"
         cp -r "$temp_dir/output/"* "$OUTPUT_DIR/" 2>/dev/null || true
     fi
     
     if [[ -d "$temp_dir/jobs/logs" ]]; then
-        echo "  → Moving logs to $LOGS_DIR/"
+        echo "  - Moving logs to $LOGS_DIR/"
         mkdir -p "$LOGS_DIR"
         cp -r "$temp_dir/jobs/logs/"* "$LOGS_DIR/" 2>/dev/null || true
     fi
     
     if [[ -d "$temp_dir/logs" ]]; then
-        echo "  → Moving logs to $LOGS_DIR/"
+        echo "  - Moving logs to $LOGS_DIR/"
         mkdir -p "$LOGS_DIR"
         cp -r "$temp_dir/logs/"* "$LOGS_DIR/" 2>/dev/null || true
     fi
@@ -60,7 +60,7 @@ extract_archive() {
     # Clean up temporary directory
     rm -rf "$temp_dir"
     
-    echo "  ✅ Extraction complete"
+    echo "  COMPLETE: Extraction complete"
 }
 
 # Function to list available archives
@@ -71,7 +71,7 @@ list_archives() {
         if [[ -f "$archive" ]]; then
             local basename=$(basename "$archive")
             local size=$(du -h "$archive" | cut -f1)
-            echo "  📦 $basename ($size)"
+            echo "  * $basename ($size)"
         fi
     done
 }
@@ -80,9 +80,9 @@ list_archives() {
 show_status() {
     echo "Current Status:"
     echo "---------------"
-    echo "📁 Downloaded archives: $(ls -1 "$DOWNLOADED_DIR"/*.tar.gz 2>/dev/null | wc -l)"
-    echo "📄 JSON results: $(ls -1 "$OUTPUT_DIR"/*.json 2>/dev/null | wc -l)"
-    echo "📋 Log files: $(ls -1 "$LOGS_DIR"/* 2>/dev/null | wc -l)"
+    echo "Downloaded archives: $(ls -1 "$DOWNLOADED_DIR"/*.tar.gz 2>/dev/null | wc -l)"
+    echo "JSON results: $(ls -1 "$OUTPUT_DIR"/*.json 2>/dev/null | wc -l)"
+    echo "Log files: $(ls -1 "$LOGS_DIR"/* 2>/dev/null | wc -l)"
 }
 
 # Main menu

@@ -19,7 +19,7 @@ binder-parameter-OSpool/
 ### Data Management Workflow
 
 **1. Download Results from Cluster:**
-- Compressed tar.gz files → `downloaded_results/`
+- Compressed tar.gz files to downloaded_results/
 
 **2. Extract and Organize:**
 ```bash
@@ -46,7 +46,7 @@ Results are saved to `analysis_results/` directory.
 
 ## Simulation Parameters (L=8,10,12 Complete)
 
-- **System sizes (L)**: [8, 10, 12] ✅ **COMPLETED**
+- **System sizes (L)**: [8, 10, 12] COMPLETED
 - **Lambda range**: 0.1 to 0.9 with fine grid around critical region (22 values total)
   - Coarse grid: λ ∈ {0.1, 0.2, 0.3, 0.35, 0.4, 0.6, 0.65, 0.7, 0.8, 0.9}
   - Fine grid: λ ∈ {0.42, 0.44, 0.46, 0.47, 0.48, 0.49, 0.50, 0.51, 0.52, 0.53, 0.54, 0.55}
@@ -57,12 +57,12 @@ Results are saved to `analysis_results/` directory.
 ## Methods Comparison
 
 ### ITensorCorrelators (Completed)
-- **Status**: ✅ Complete (1,302 results)
+- **Status**: Complete (1,302 results)
 - **Method**: Built-in correlation functions from ITensorCorrelators.jl
 - **Files**: `run_standard.jl`, `src/BinderSim.jl`
 
 ### Manual Correlators (Ready for Deployment)
-- **Status**: 🚀 Infrastructure ready (1,320 jobs prepared)
+- **Status**: Infrastructure ready (1,320 jobs prepared)
 - **Method**: Direct tensor contractions for method validation
 - **Files**: `run_manual.jl`, `src/BinderSimManual.jl`, `src/ManualCorrelators.jl`
 
