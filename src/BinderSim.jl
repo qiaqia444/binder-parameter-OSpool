@@ -85,36 +85,45 @@ function ea_binder_mc(L::Int; lambda_x::Float64, lambda_zz::Float64,
     for t in 1:ntrials
         ψ, sites = evolve_one_trial(L; lambda_x=lambda_x, lambda_zz=lambda_zz,
                                     maxdim=maxdim, cutoff=cutoff, rng=rng)
-        # compute S2,S4 once to form both EA-B and per-trial B
-        # (reuse code to avoid recomputing correlators)
-        Ls = length(sites)
-        pairs = [(i,j) for i in 1:Ls for j in 1:Ls]
-        c2 = correlator(ψ, ("Sz","Sz"), pairs)
-        S2 = 0.0
-        for (i,j) in pairs
-            v = real(c2[(i,j)])
-            S2 += v*v
-        end
-        # 4-point chunked
-        S4 = 0.0
-        buf = NTuple{4,Int}[]
-        function flush!()
-            isempty(buf) && return
-            c4 = correlator(ψ, ("Sz","Sz","Sz","Sz"), buf)
-            for key in buf
-                v = real(c4[key]); S4 += v*v
-            end
-            empty!(buf)
-        end
-        for i in 1:Ls, j in 1:Ls, k in 1:Ls, l in 1:Ls
-            push!(buf, (i,j,k,l))
-            if length(buf) >= chunk4; flush!(); end
-        end
-        flush!()
+        
+        # Use the working approach from the notebook
+        # --- put the center in the middle and ensure norm 1 ---
+        orthogonalize!(ψ, cld(length(sites),2))
+        normalize!(ψ)
 
-        S2s[t] = S2
-        S4s[t] = S4
-        Bs[t]  = 1.0 - S4 / max(3.0*S2*S2, 1e-30)
+        # Central 60%
+        L_total = length(sites)
+        central_fraction = 0.6
+        num_central = max(1, round(Int, central_fraction * L_total))
+        start_idx = (L_total - num_central) ÷ 2 + 1
+        end_idx   = start_idx + num_central - 1
+        idx = start_idx:end_idx
+        n = length(idx)
+
+        pairs = [(i,j) for i in idx for j in idx]
+        quads = [(i,j,k,l) for i in idx for j in idx for k in idx for l in idx]
+
+        z2 = correlator(ψ, ("Z","Z"), pairs)
+        z4 = correlator(ψ, ("Z","Z","Z","Z"), quads)
+
+        sum2_sq = 0.0
+        @inbounds for (i,j) in pairs
+            v = real(z2[(i,j)])
+            sum2_sq += v*v
+        end
+        sum4_sq = 0.0
+        @inbounds for (i,j,k,l) in quads
+            v = real(z4[(i,j,k,l)])
+            sum4_sq += v*v
+        end
+
+        M2sq = sum2_sq / n^2
+        M4sq = sum4_sq / n^4
+        den  = 3.0 * max(M2sq^2, 1e-12)
+        
+        S2s[t] = M2sq
+        S4s[t] = M4sq
+        Bs[t]  = 1.0 - M4sq / den
     end
 
     S2_bar = mean(S2s)

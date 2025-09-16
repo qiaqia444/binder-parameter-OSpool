@@ -3,7 +3,7 @@
 "Format one CLI line for run_adaptive.jl with adaptive parameters."
 function format_adaptive_line(L, lambda_x, lambda_zz, lambda, seed, sample, out_prefix, outdir)
     # Use adaptive parameters - the script will automatically adjust maxdim, cutoff, chunk4
-    ntrials = 1000  # Keep consistent
+    ntrials = 2000  # Your requested number of trials
     return "--L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir $outdir"
 end
 
@@ -19,9 +19,9 @@ end
 
 # Generate ADAPTIVE production parameters (all system sizes with adaptive settings)
 function generate_adaptive_production_params()
-    Ls = [12, 16, 20, 24, 28]  # All system sizes from README
+    Ls = [8, 12, 16]  # Your requested system sizes
     
-    # Lambda values as specified in README
+    # Your specified lambda values
     coarse_lambdas = [0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9]
     fine_lambdas = [0.46, 0.47, 0.48, 0.49, 0.50, 0.51, 0.52, 0.53, 0.54]
     lambdas = sort(unique(vcat(coarse_lambdas, fine_lambdas)))
@@ -45,12 +45,12 @@ function generate_adaptive_production_params()
     write_params("jobs/params_adaptive.txt", lines)
 end
 
-# Generate test with larger systems
+# Generate test with your specified systems
 function generate_adaptive_test_params()
-    Ls = [12, 16, 20]  # Test with progressively larger systems
+    Ls = [8, 12, 16]  # Your requested system sizes
     lambdas = [0.3, 0.5, 0.7]  # Three representative lambda values
     samples_per_lambda = 1
-    ntrials = 100  # Smaller for testing
+    ntrials = 200  # Smaller for testing
     base_seed = 1234
     outdir = "output"
     
@@ -64,7 +64,7 @@ function generate_adaptive_test_params()
         out_prefix = "adaptive_test_L$(L)_lam$(round(λ, digits=3))_s$(sample)"
         
         # For testing, use the adaptive format but override ntrials
-        line = "--L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $λ --ntrials 100 --seed $seed --sample $sample --out_prefix $out_prefix --outdir $outdir"
+        line = "--L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $λ --ntrials 200 --seed $seed --sample $sample --out_prefix $out_prefix --outdir $outdir"
         push!(lines, line)
     end
     
