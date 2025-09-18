@@ -16,17 +16,23 @@ function create_weak_measurement_operators(sites, lambda_x::Float64, lambda_zz::
 
     for i in 1:length(sites)
         Id_i = op("Id", sites[i])
+        # Match sparse matrix exactly: X = [[0,1],[1,0]]
+        # ITensor Sx = 0.5 * Pauli_X, so 2*Sx = Pauli_X
         X_i  = 2 * op("Sx", sites[i])
-        WEAK_X_0[i] = (Id_i + lambda_x * X_i) / norm_x
-        WEAK_X_1[i] = (Id_i - lambda_x * X_i) / norm_x
+        # Match sparse: (I + (-1)^outcome * lam * X) / norm
+        WEAK_X_0[i] = (Id_i + lambda_x * X_i) / norm_x     # outcome = 0
+        WEAK_X_1[i] = (Id_i - lambda_x * X_i) / norm_x     # outcome = 1
     end
     for i in 1:(length(sites)-1)
+        # Match sparse matrix exactly: Z = [[1,0],[0,-1]]  
+        # ITensor Sz = 0.5 * Pauli_Z, so 2*Sz = Pauli_Z
         Z_i = 2 * op("Sz", sites[i])
         Z_j = 2 * op("Sz", sites[i+1])
         II  = op("Id", sites[i]) * op("Id", sites[i+1])
         ZZ  = Z_i * Z_j
-        WEAK_ZZ_0[(i,i+1)] = (II + lambda_zz * ZZ) / norm_zz
-        WEAK_ZZ_1[(i,i+1)] = (II - lambda_zz * ZZ) / norm_zz
+        # Match sparse: (I⊗I + (-1)^outcome * lam * ZZ) / norm
+        WEAK_ZZ_0[(i,i+1)] = (II + lambda_zz * ZZ) / norm_zz   # outcome = 0
+        WEAK_ZZ_1[(i,i+1)] = (II - lambda_zz * ZZ) / norm_zz   # outcome = 1
     end
     return WEAK_X_0, WEAK_X_1, WEAK_ZZ_0, WEAK_ZZ_1
 end

@@ -41,9 +41,9 @@ function generate_test_params()
     write_params("jobs/params_test.txt", lines)
 end
 
-# Generate PRODUCTION parameters (full simulation per README)
+# Generate PRODUCTION parameters (corrected L values for crossing point analysis)
 function generate_production_params()
-    Ls = [12, 16, 20, 24, 28]  # System sizes from README
+    Ls = [8, 12, 16]  # Focus on these sizes for crossing point analysis
     
     # Lambda values as specified in README
     coarse_lambdas = [0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9]
