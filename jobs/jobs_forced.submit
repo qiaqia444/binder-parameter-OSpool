@@ -35,4 +35,4 @@ requirements = (OpSysAndVer =?= "AlmaLinux9") || (OpSysAndVer =?= "Rocky8") || (
 arguments = $(ARGS)
 
 # Number of jobs - Full production run (153 jobs)
-queue ARGS from jobs/params_forced.txt
+queue ARGS from params_forced.txt
