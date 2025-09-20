@@ -5,3 +5,5 @@ status
 /containers/*.sif
 *.sif
 /analysis_results/
+/downloaded_results/
+*.tar.gz
