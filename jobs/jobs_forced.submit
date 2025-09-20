@@ -1,0 +1,38 @@
+# HTCondor submit file for Forced +1 Measurement Binder Parameter Calculation
+# This runs Edwards-Anderson simulations with forced +1 measurement outcomes
+
+# Job executable and universe
+executable = jobs/run_forced.sh
+universe = vanilla
+
+# Resource requirements
+request_cpus = 4
+request_memory = 4GB
+request_disk = 4GB
+
+# Job duration and priority
++JobDurationCategory = "Medium"
++WantFlocking = true
++WantGlidein = true
+
+# File transfer
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = run_forced.jl, src/, Project.toml, Manifest.toml
+
+# Output/Error/Log files
+output = logs/forced_$(Cluster).$(Process).out
+error = logs/forced_$(Cluster).$(Process).err
+log = logs/forced_$(Cluster).$(Process).log
+
+# Create output directory on execute node
+initialdir = $(SUBMIT_DIR)
+
+# Job requirements - prefer newer nodes
+requirements = (OpSysAndVer =?= "AlmaLinux9") || (OpSysAndVer =?= "Rocky8") || (OpSysAndVer =?= "CentOS7")
+
+# Arguments from parameter file
+arguments = $(ARGS)
+
+# Number of jobs - Full production run (153 jobs)
+queue ARGS from jobs/params_forced.txt

@@ -1,0 +1,15 @@
+--L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 1 --seed 1235 --sample 1 --out_prefix forced_test_L8_lam0.1_s1 --outdir output
+--L 8 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 1 --seed 1236 --sample 1 --out_prefix forced_test_L8_lam0.3_s1 --outdir output
+--L 8 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 1 --seed 1237 --sample 1 --out_prefix forced_test_L8_lam0.5_s1 --outdir output
+--L 8 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 1 --seed 1238 --sample 1 --out_prefix forced_test_L8_lam0.7_s1 --outdir output
+--L 8 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 1 --seed 1239 --sample 1 --out_prefix forced_test_L8_lam0.9_s1 --outdir output
+--L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 1 --seed 1240 --sample 1 --out_prefix forced_test_L12_lam0.1_s1 --outdir output
+--L 12 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 1 --seed 1241 --sample 1 --out_prefix forced_test_L12_lam0.3_s1 --outdir output
+--L 12 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 1 --seed 1242 --sample 1 --out_prefix forced_test_L12_lam0.5_s1 --outdir output
+--L 12 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 1 --seed 1243 --sample 1 --out_prefix forced_test_L12_lam0.7_s1 --outdir output
+--L 12 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 1 --seed 1244 --sample 1 --out_prefix forced_test_L12_lam0.9_s1 --outdir output
+--L 16 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 1 --seed 1245 --sample 1 --out_prefix forced_test_L16_lam0.1_s1 --outdir output
+--L 16 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 1 --seed 1246 --sample 1 --out_prefix forced_test_L16_lam0.3_s1 --outdir output
+--L 16 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 1 --seed 1247 --sample 1 --out_prefix forced_test_L16_lam0.5_s1 --outdir output
+--L 16 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 1 --seed 1248 --sample 1 --out_prefix forced_test_L16_lam0.7_s1 --outdir output
+--L 16 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 1 --seed 1249 --sample 1 --out_prefix forced_test_L16_lam0.9_s1 --outdir output
