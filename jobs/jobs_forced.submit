@@ -2,7 +2,7 @@
 # This runs Edwards-Anderson simulations with forced +1 measurement outcomes
 
 # Job executable and universe
-executable = jobs/run_forced.sh
+executable = run_forced.sh
 universe = vanilla
 
 # Resource requirements
