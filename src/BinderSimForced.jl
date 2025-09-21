@@ -79,11 +79,8 @@ function evolve_one_trial_forced(L::Int; lambda_x::Float64, lambda_zz::Float64,
             ψ = apply_forced_measurement(ψ, KX1[i], [i]; maxdim=maxdim, cutoff=cutoff)
         end
         
-        # weak ZZ brickwork: even, then odd bonds - FORCED +1 outcomes
-        for i in 1:2:(L-1)
-            ψ = apply_forced_measurement(ψ, KZZ1[(i,i+1)], [i,i+1]; maxdim=maxdim, cutoff=cutoff)
-        end
-        for i in 2:2:(L-1)
+        # weak ZZ simultaneous: all adjacent bonds - FORCED +1 outcomes (physically correct)
+        for i in 1:(L-1)
             ψ = apply_forced_measurement(ψ, KZZ1[(i,i+1)], [i,i+1]; maxdim=maxdim, cutoff=cutoff)
         end
         

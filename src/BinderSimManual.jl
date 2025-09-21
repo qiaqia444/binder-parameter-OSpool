@@ -63,12 +63,8 @@ function evolve_one_trial(L::Int; lambda_x::Float64, lambda_zz::Float64,
         for i in 1:L
             ψ = sample_and_apply(ψ, KX0[i], KX1[i], [i]; maxdim=maxdim, cutoff=cutoff, rng=rng)
         end
-        # weak ZZ brickwork: even, then odd bonds
-        for i in 1:2:(L-1)
-            ψ = sample_and_apply(ψ, KZZ0[(i,i+1)], KZZ1[(i,i+1)], [i,i+1];
-                                 maxdim=maxdim, cutoff=cutoff, rng=rng)
-        end
-        for i in 2:2:(L-1)
+        # weak ZZ simultaneous: all adjacent bonds (physically correct)
+        for i in 1:(L-1)
             ψ = sample_and_apply(ψ, KZZ0[(i,i+1)], KZZ1[(i,i+1)], [i,i+1];
                                  maxdim=maxdim, cutoff=cutoff, rng=rng)
         end

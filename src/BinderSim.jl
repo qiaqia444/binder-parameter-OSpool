@@ -63,16 +63,12 @@ function evolve_one_trial(L::Int; lambda_x::Float64, lambda_zz::Float64,
     KX0, KX1, KZZ0, KZZ1 = create_weak_measurement_operators(sites, lambda_x, lambda_zz)
     T_max = 2L
     for _ in 1:T_max
-        # weak X on all sites
+        # weak X on all sites - random sampling
         for i in 1:L
             ψ = sample_and_apply(ψ, KX0[i], KX1[i], [i]; maxdim=maxdim, cutoff=cutoff, rng=rng)
         end
-        # weak ZZ brickwork: even, then odd bonds
-        for i in 1:2:(L-1)
-            ψ = sample_and_apply(ψ, KZZ0[(i,i+1)], KZZ1[(i,i+1)], [i,i+1];
-                                 maxdim=maxdim, cutoff=cutoff, rng=rng)
-        end
-        for i in 2:2:(L-1)
+        # weak ZZ simultaneous: all adjacent bonds - random sampling (physically correct)
+        for i in 1:(L-1)
             ψ = sample_and_apply(ψ, KZZ0[(i,i+1)], KZZ1[(i,i+1)], [i,i+1];
                                  maxdim=maxdim, cutoff=cutoff, rng=rng)
         end
