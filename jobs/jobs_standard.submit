@@ -1,4 +1,5 @@
-#!/bin/bash
+# HTCondor submit file for Standard BinderSim
+# This runs Edwards-Anderson simulations with random measurement outcomes
 
 universe = vanilla
 executable = run_standard.sh

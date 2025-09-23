@@ -28,17 +28,11 @@ log = logs/binderForced_$(Cluster).$(Process).log
 # Create output directory on execute node
 initialdir = $(SUBMIT_DIR)
 
+# Job requirements - prefer newer nodes
+requirements = (OpSysAndVer =?= "AlmaLinux9") || (OpSysAndVer =?= "Rocky8") || (OpSysAndVer =?= "CentOS7")
+
 # Job parameters - will be substituted from params_adaptive.txt
 arguments = $(args)
 
 # Submit one job per parameter line
 queue args from params_adaptive.txt
-
-# Job requirements - prefer newer nodes
-requirements = (OpSysAndVer =?= "AlmaLinux9") || (OpSysAndVer =?= "Rocky8") || (OpSysAndVer =?= "CentOS7")
-
-# Arguments from parameter file
-arguments = $(ARGS)
-
-# Number of jobs - Full production run (153 jobs)
-queue ARGS from params_forced.txt

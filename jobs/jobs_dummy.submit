@@ -1,4 +1,5 @@
-#!/bin/bash
+# HTCondor submit file for Dummy Site BinderSim
+# This runs Edwards-Anderson simulations with dummy site for complete ZZ coverage
 
 universe = vanilla
 executable = run_dummy.sh
