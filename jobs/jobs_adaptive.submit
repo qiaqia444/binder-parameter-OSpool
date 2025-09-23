@@ -7,11 +7,11 @@ universe = vanilla
 
 # Resource requirements
 request_cpus = 4
-request_memory = 8GB
+request_memory = 4GB
 request_disk = 4GB
 
 # Job duration and priority
-+JobDurationCategory = "Long"
++JobDurationCategory = "Medium"
 +WantFlocking = true
 +WantGlidein = true
 
