@@ -93,13 +93,9 @@ function ea_binder_mc(L::Int; lambda_x::Float64, lambda_zz::Float64,
         orthogonalize!(ψ, cld(length(sites),2))
         normalize!(ψ)
 
-        # Central 60%
+        # Use ALL sites for correlation calculation (not just central fraction)
         L_total = length(sites)
-        central_fraction = 0.6
-        num_central = max(1, round(Int, central_fraction * L_total))
-        start_idx = (L_total - num_central) ÷ 2 + 1
-        end_idx   = start_idx + num_central - 1
-        idx = start_idx:end_idx
+        idx = 1:L_total
         n = length(idx)
 
         pairs = [(i,j) for i in idx for j in idx]

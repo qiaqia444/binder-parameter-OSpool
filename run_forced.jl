@@ -121,8 +121,8 @@ function main()
             "success" => true
         )
         
-        # Save results
-        output_file = joinpath(args["outdir"], "$(args["out_prefix"]).json")
+        # Save results with distinct naming
+        output_file = joinpath(args["outdir"], "forced_$(args["out_prefix"]).json")
         open(output_file, "w") do io
             JSON.print(io, output_data, 2)
         end

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+universe = vanilla
+executable = run_dummy.sh
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+requirements = (OpSysAndVer == "AlmaLinux9")
+
+# Transfer all necessary files
+transfer_input_files = run_dummy.jl, Manifest.toml, Project.toml, src/BinderSimWithDummy.jl, containers/image.def
+
+# Resource requirements
+request_cpus = 1
+request_memory = 4GB
+request_disk = 1GB
+
+# Logging
+log = logs/binderDummy_$(Cluster)_$(Process).log
+output = logs/binderDummy_$(Cluster)_$(Process).out
+error = logs/binderDummy_$(Cluster)_$(Process).err
+
+# Job parameters - will be substituted from params_adaptive.txt
+arguments = $(args)
+
+# Submit one job per parameter line
+queue args from params_adaptive.txt
