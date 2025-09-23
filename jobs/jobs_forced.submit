@@ -8,7 +8,7 @@ universe = vanilla
 # Resource requirements
 request_cpus = 4
 request_memory = 4GB
-request_disk = 4GB
+request_disk = 8GB
 
 # Job duration and priority
 +JobDurationCategory = "Medium"
@@ -28,8 +28,11 @@ log = logs/binderForced_$(Cluster).$(Process).log
 # Create output directory on execute node
 initialdir = $(SUBMIT_DIR)
 
-# Job requirements - prefer newer nodes
+# Job requirements - prefer newer nodes with Julia available
 requirements = (OpSysAndVer =?= "AlmaLinux9") || (OpSysAndVer =?= "Rocky8") || (OpSysAndVer =?= "CentOS7")
++WantOSPoolStashCache = true
++WantOSPoolModules = true
++SingularityImage = "docker://julia:1.11"
 
 # Job parameters - will be substituted from params_adaptive.txt
 arguments = $(args)

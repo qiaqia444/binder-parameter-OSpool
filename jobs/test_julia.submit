@@ -1,0 +1,27 @@
+# Test HTCondor submit file to verify Julia container works
+universe = vanilla
+executable = test_julia.sh
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+# Use same requirements as production jobs
+requirements = (OpSysAndVer =?= "AlmaLinux9") || (OpSysAndVer =?= "Rocky8") || (OpSysAndVer =?= "CentOS7")
++WantOSPoolStashCache = true
++WantOSPoolModules = true
++SingularityImage = "docker://julia:1.11"
+
+# Transfer basic project files
+transfer_input_files = ../Project.toml, ../Manifest.toml
+
+# Resource requirements - smaller for test
+request_cpus = 1
+request_memory = 2GB
+request_disk = 4GB
+
+# Logging
+log = logs/juliaTest_$(Cluster).log
+output = logs/juliaTest_$(Cluster).out
+error = logs/juliaTest_$(Cluster).err
+
+# Single test job
+queue 1

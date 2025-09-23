@@ -16,16 +16,44 @@ echo "Working directory: $(pwd)"
 echo "Available files:"
 ls -la
 
-# Check Julia installation
-echo "Julia version:"
-julia --version
+# Create output directory
+mkdir -p output
 
-# Activate Julia environment and run the simulation
-echo "Starting forced +1 measurement simulation..."
-echo "Command: julia --project=. run_forced.jl $ARGS"
-
-julia --project=. run_forced.jl $ARGS
-EXIT_CODE=$?
+# Check if Apptainer/Singularity is available and use container
+if command -v apptainer >/dev/null 2>&1; then
+    echo "Using Apptainer with Julia container..."
+    # Use pre-pulled Julia container or pull if needed
+    if [ ! -f julia.sif ]; then
+        echo "Pulling Julia container..."
+        apptainer pull julia.sif docker://julia:1.11
+    fi
+    # Install packages in container
+    echo "Setting up Julia environment in container..."
+    apptainer exec julia.sif julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+    # Run simulation
+    echo "Running forced simulation in container..."
+    echo "Command: apptainer exec julia.sif julia --project=. run_forced.jl $ARGS"
+    apptainer exec julia.sif julia --project=. run_forced.jl $ARGS
+    EXIT_CODE=$?
+elif command -v singularity >/dev/null 2>&1; then
+    echo "Using Singularity with Julia container..."
+    # Use Singularity (older version)
+    if [ ! -f julia.sif ]; then
+        echo "Pulling Julia container..."
+        singularity pull julia.sif docker://julia:1.11
+    fi
+    # Install packages in container
+    echo "Setting up Julia environment in container..."
+    singularity exec julia.sif julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+    # Run simulation
+    echo "Running forced simulation in container..."
+    echo "Command: singularity exec julia.sif julia --project=. run_forced.jl $ARGS"
+    singularity exec julia.sif julia --project=. run_forced.jl $ARGS
+    EXIT_CODE=$?
+else
+    echo "No container runtime found, this job requires Apptainer/Singularity"
+    exit 1
+fi
 
 echo "Simulation completed with exit code: $EXIT_CODE"
 
