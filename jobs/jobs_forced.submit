@@ -12,7 +12,7 @@ should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_output_files   = output
 
-# Logs (on submit node)
+# Logs (on submit node) 
 output                = logs/forced_$(L)_$(lambda)_$(sample).out
 error                 = logs/forced_$(L)_$(lambda)_$(sample).err
 log                   = logs/forced_condor.log
