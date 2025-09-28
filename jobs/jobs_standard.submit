@@ -17,7 +17,7 @@ transfer_input_files = ../run.jl, ../Manifest.toml, ../Project.toml, ../src/Bind
 # Resource requirements
 request_cpus = 4
 request_memory = 4GB
-request_disk = 8GB
+request_disk = 4GB
 
 # Logging
 log = logs/binderSim_$(Cluster)_$(Process).log
