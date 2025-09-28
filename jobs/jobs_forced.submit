@@ -21,8 +21,8 @@ log                   = logs/forced_condor.log
 
 # Resources
 request_cpus          = 4
-request_memory        = 4 GB
-request_disk          = 4GB
+request_memory        = 8 GB
+request_disk          = 8 GB
 
 # Use your working container
 container_image = /ospool/ap40/data/qia.wang/container.sif
