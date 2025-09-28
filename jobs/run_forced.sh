@@ -3,13 +3,20 @@
 # HTCondor job script for forced +1 measurement Binder parameter calculation
 # This script runs a single forced measurement simulation
 
-# Get arguments from HTCondor
-ARGS="$@"
+# Get individual arguments from HTCondor
+L=$1
+lambda_x=$2
+lambda_zz=$3
+lambda=$4
+ntrials=$5
+seed=$6
+sample=$7
+out_prefix=$8
 
 echo "=== Forced +1 Measurement Job Start ==="
 echo "Job started at: $(date)"
 echo "Running on: $(hostname)"
-echo "Arguments: $ARGS"
+echo "Parameters: L=$L lambda_x=$lambda_x lambda_zz=$lambda_zz lambda=$lambda ntrials=$ntrials seed=$seed sample=$sample out_prefix=$out_prefix"
 echo "Working directory: $(pwd)"
 
 # List available files
@@ -19,41 +26,19 @@ ls -la
 # Create output directory
 mkdir -p output
 
-# Check if Apptainer/Singularity is available and use container
-if command -v apptainer >/dev/null 2>&1; then
-    echo "Using Apptainer with Julia container..."
-    # Use pre-pulled Julia container or pull if needed
-    if [ ! -f julia.sif ]; then
-        echo "Pulling Julia container..."
-        apptainer pull julia.sif docker://julia:1.11
-    fi
-    # Install packages in container
-    echo "Setting up Julia environment in container..."
-    apptainer exec julia.sif julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
-    # Run simulation
-    echo "Running forced simulation in container..."
-    echo "Command: apptainer exec julia.sif julia --project=. run_forced.jl $ARGS"
-    apptainer exec julia.sif julia --project=. run_forced.jl $ARGS
-    EXIT_CODE=$?
-elif command -v singularity >/dev/null 2>&1; then
-    echo "Using Singularity with Julia container..."
-    # Use Singularity (older version)
-    if [ ! -f julia.sif ]; then
-        echo "Pulling Julia container..."
-        singularity pull julia.sif docker://julia:1.11
-    fi
-    # Install packages in container
-    echo "Setting up Julia environment in container..."
-    singularity exec julia.sif julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
-    # Run simulation
-    echo "Running forced simulation in container..."
-    echo "Command: singularity exec julia.sif julia --project=. run_forced.jl $ARGS"
-    singularity exec julia.sif julia --project=. run_forced.jl $ARGS
-    EXIT_CODE=$?
-else
-    echo "No container runtime found, this job requires Apptainer/Singularity"
-    exit 1
-fi
+# Check Julia version
+echo "Julia version:"
+julia --version
+
+# Install packages
+echo "Setting up Julia environment..."
+julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+# Run simulation
+echo "Running forced simulation..."
+echo "Command: julia --project=. run_forced.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir output"
+julia --project=. run_forced.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir output
+EXIT_CODE=$?
 
 echo "Simulation completed with exit code: $EXIT_CODE"
 

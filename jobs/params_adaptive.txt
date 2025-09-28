@@ -1,153 +1,153 @@
---L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1235 --sample 1 --out_prefix L8_lam0.1_s1 --outdir output
---L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1236 --sample 2 --out_prefix L8_lam0.1_s2 --outdir output
---L 8 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1237 --sample 3 --out_prefix L8_lam0.1_s3 --outdir output
---L 8 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1238 --sample 1 --out_prefix L8_lam0.2_s1 --outdir output
---L 8 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1239 --sample 2 --out_prefix L8_lam0.2_s2 --outdir output
---L 8 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1240 --sample 3 --out_prefix L8_lam0.2_s3 --outdir output
---L 8 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1241 --sample 1 --out_prefix L8_lam0.3_s1 --outdir output
---L 8 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1242 --sample 2 --out_prefix L8_lam0.3_s2 --outdir output
---L 8 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1243 --sample 3 --out_prefix L8_lam0.3_s3 --outdir output
---L 8 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1244 --sample 1 --out_prefix L8_lam0.4_s1 --outdir output
---L 8 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1245 --sample 2 --out_prefix L8_lam0.4_s2 --outdir output
---L 8 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1246 --sample 3 --out_prefix L8_lam0.4_s3 --outdir output
---L 8 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1247 --sample 1 --out_prefix L8_lam0.46_s1 --outdir output
---L 8 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1248 --sample 2 --out_prefix L8_lam0.46_s2 --outdir output
---L 8 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1249 --sample 3 --out_prefix L8_lam0.46_s3 --outdir output
---L 8 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1250 --sample 1 --out_prefix L8_lam0.47_s1 --outdir output
---L 8 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1251 --sample 2 --out_prefix L8_lam0.47_s2 --outdir output
---L 8 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1252 --sample 3 --out_prefix L8_lam0.47_s3 --outdir output
---L 8 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1253 --sample 1 --out_prefix L8_lam0.48_s1 --outdir output
---L 8 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1254 --sample 2 --out_prefix L8_lam0.48_s2 --outdir output
---L 8 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1255 --sample 3 --out_prefix L8_lam0.48_s3 --outdir output
---L 8 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1256 --sample 1 --out_prefix L8_lam0.49_s1 --outdir output
---L 8 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1257 --sample 2 --out_prefix L8_lam0.49_s2 --outdir output
---L 8 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1258 --sample 3 --out_prefix L8_lam0.49_s3 --outdir output
---L 8 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1259 --sample 1 --out_prefix L8_lam0.5_s1 --outdir output
---L 8 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1260 --sample 2 --out_prefix L8_lam0.5_s2 --outdir output
---L 8 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1261 --sample 3 --out_prefix L8_lam0.5_s3 --outdir output
---L 8 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1262 --sample 1 --out_prefix L8_lam0.51_s1 --outdir output
---L 8 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1263 --sample 2 --out_prefix L8_lam0.51_s2 --outdir output
---L 8 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1264 --sample 3 --out_prefix L8_lam0.51_s3 --outdir output
---L 8 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1265 --sample 1 --out_prefix L8_lam0.52_s1 --outdir output
---L 8 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1266 --sample 2 --out_prefix L8_lam0.52_s2 --outdir output
---L 8 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1267 --sample 3 --out_prefix L8_lam0.52_s3 --outdir output
---L 8 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1268 --sample 1 --out_prefix L8_lam0.53_s1 --outdir output
---L 8 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1269 --sample 2 --out_prefix L8_lam0.53_s2 --outdir output
---L 8 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1270 --sample 3 --out_prefix L8_lam0.53_s3 --outdir output
---L 8 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1271 --sample 1 --out_prefix L8_lam0.54_s1 --outdir output
---L 8 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1272 --sample 2 --out_prefix L8_lam0.54_s2 --outdir output
---L 8 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1273 --sample 3 --out_prefix L8_lam0.54_s3 --outdir output
---L 8 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1274 --sample 1 --out_prefix L8_lam0.6_s1 --outdir output
---L 8 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1275 --sample 2 --out_prefix L8_lam0.6_s2 --outdir output
---L 8 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1276 --sample 3 --out_prefix L8_lam0.6_s3 --outdir output
---L 8 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1277 --sample 1 --out_prefix L8_lam0.7_s1 --outdir output
---L 8 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1278 --sample 2 --out_prefix L8_lam0.7_s2 --outdir output
---L 8 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1279 --sample 3 --out_prefix L8_lam0.7_s3 --outdir output
---L 8 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1280 --sample 1 --out_prefix L8_lam0.8_s1 --outdir output
---L 8 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1281 --sample 2 --out_prefix L8_lam0.8_s2 --outdir output
---L 8 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1282 --sample 3 --out_prefix L8_lam0.8_s3 --outdir output
---L 8 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1283 --sample 1 --out_prefix L8_lam0.9_s1 --outdir output
---L 8 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1284 --sample 2 --out_prefix L8_lam0.9_s2 --outdir output
---L 8 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1285 --sample 3 --out_prefix L8_lam0.9_s3 --outdir output
---L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1286 --sample 1 --out_prefix L12_lam0.1_s1 --outdir output
---L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1287 --sample 2 --out_prefix L12_lam0.1_s2 --outdir output
---L 12 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1288 --sample 3 --out_prefix L12_lam0.1_s3 --outdir output
---L 12 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1289 --sample 1 --out_prefix L12_lam0.2_s1 --outdir output
---L 12 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1290 --sample 2 --out_prefix L12_lam0.2_s2 --outdir output
---L 12 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1291 --sample 3 --out_prefix L12_lam0.2_s3 --outdir output
---L 12 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1292 --sample 1 --out_prefix L12_lam0.3_s1 --outdir output
---L 12 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1293 --sample 2 --out_prefix L12_lam0.3_s2 --outdir output
---L 12 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1294 --sample 3 --out_prefix L12_lam0.3_s3 --outdir output
---L 12 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1295 --sample 1 --out_prefix L12_lam0.4_s1 --outdir output
---L 12 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1296 --sample 2 --out_prefix L12_lam0.4_s2 --outdir output
---L 12 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1297 --sample 3 --out_prefix L12_lam0.4_s3 --outdir output
---L 12 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1298 --sample 1 --out_prefix L12_lam0.46_s1 --outdir output
---L 12 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1299 --sample 2 --out_prefix L12_lam0.46_s2 --outdir output
---L 12 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1300 --sample 3 --out_prefix L12_lam0.46_s3 --outdir output
---L 12 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1301 --sample 1 --out_prefix L12_lam0.47_s1 --outdir output
---L 12 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1302 --sample 2 --out_prefix L12_lam0.47_s2 --outdir output
---L 12 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1303 --sample 3 --out_prefix L12_lam0.47_s3 --outdir output
---L 12 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1304 --sample 1 --out_prefix L12_lam0.48_s1 --outdir output
---L 12 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1305 --sample 2 --out_prefix L12_lam0.48_s2 --outdir output
---L 12 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1306 --sample 3 --out_prefix L12_lam0.48_s3 --outdir output
---L 12 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1307 --sample 1 --out_prefix L12_lam0.49_s1 --outdir output
---L 12 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1308 --sample 2 --out_prefix L12_lam0.49_s2 --outdir output
---L 12 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1309 --sample 3 --out_prefix L12_lam0.49_s3 --outdir output
---L 12 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1310 --sample 1 --out_prefix L12_lam0.5_s1 --outdir output
---L 12 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1311 --sample 2 --out_prefix L12_lam0.5_s2 --outdir output
---L 12 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1312 --sample 3 --out_prefix L12_lam0.5_s3 --outdir output
---L 12 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1313 --sample 1 --out_prefix L12_lam0.51_s1 --outdir output
---L 12 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1314 --sample 2 --out_prefix L12_lam0.51_s2 --outdir output
---L 12 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1315 --sample 3 --out_prefix L12_lam0.51_s3 --outdir output
---L 12 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1316 --sample 1 --out_prefix L12_lam0.52_s1 --outdir output
---L 12 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1317 --sample 2 --out_prefix L12_lam0.52_s2 --outdir output
---L 12 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1318 --sample 3 --out_prefix L12_lam0.52_s3 --outdir output
---L 12 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1319 --sample 1 --out_prefix L12_lam0.53_s1 --outdir output
---L 12 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1320 --sample 2 --out_prefix L12_lam0.53_s2 --outdir output
---L 12 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1321 --sample 3 --out_prefix L12_lam0.53_s3 --outdir output
---L 12 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1322 --sample 1 --out_prefix L12_lam0.54_s1 --outdir output
---L 12 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1323 --sample 2 --out_prefix L12_lam0.54_s2 --outdir output
---L 12 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1324 --sample 3 --out_prefix L12_lam0.54_s3 --outdir output
---L 12 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1325 --sample 1 --out_prefix L12_lam0.6_s1 --outdir output
---L 12 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1326 --sample 2 --out_prefix L12_lam0.6_s2 --outdir output
---L 12 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1327 --sample 3 --out_prefix L12_lam0.6_s3 --outdir output
---L 12 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1328 --sample 1 --out_prefix L12_lam0.7_s1 --outdir output
---L 12 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1329 --sample 2 --out_prefix L12_lam0.7_s2 --outdir output
---L 12 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1330 --sample 3 --out_prefix L12_lam0.7_s3 --outdir output
---L 12 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1331 --sample 1 --out_prefix L12_lam0.8_s1 --outdir output
---L 12 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1332 --sample 2 --out_prefix L12_lam0.8_s2 --outdir output
---L 12 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1333 --sample 3 --out_prefix L12_lam0.8_s3 --outdir output
---L 12 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1334 --sample 1 --out_prefix L12_lam0.9_s1 --outdir output
---L 12 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1335 --sample 2 --out_prefix L12_lam0.9_s2 --outdir output
---L 12 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1336 --sample 3 --out_prefix L12_lam0.9_s3 --outdir output
---L 16 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1337 --sample 1 --out_prefix L16_lam0.1_s1 --outdir output
---L 16 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1338 --sample 2 --out_prefix L16_lam0.1_s2 --outdir output
---L 16 --lambda_x 0.1 --lambda_zz 0.9 --lambda 0.1 --ntrials 2000 --seed 1339 --sample 3 --out_prefix L16_lam0.1_s3 --outdir output
---L 16 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1340 --sample 1 --out_prefix L16_lam0.2_s1 --outdir output
---L 16 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1341 --sample 2 --out_prefix L16_lam0.2_s2 --outdir output
---L 16 --lambda_x 0.2 --lambda_zz 0.8 --lambda 0.2 --ntrials 2000 --seed 1342 --sample 3 --out_prefix L16_lam0.2_s3 --outdir output
---L 16 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1343 --sample 1 --out_prefix L16_lam0.3_s1 --outdir output
---L 16 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1344 --sample 2 --out_prefix L16_lam0.3_s2 --outdir output
---L 16 --lambda_x 0.3 --lambda_zz 0.7 --lambda 0.3 --ntrials 2000 --seed 1345 --sample 3 --out_prefix L16_lam0.3_s3 --outdir output
---L 16 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1346 --sample 1 --out_prefix L16_lam0.4_s1 --outdir output
---L 16 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1347 --sample 2 --out_prefix L16_lam0.4_s2 --outdir output
---L 16 --lambda_x 0.4 --lambda_zz 0.6 --lambda 0.4 --ntrials 2000 --seed 1348 --sample 3 --out_prefix L16_lam0.4_s3 --outdir output
---L 16 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1349 --sample 1 --out_prefix L16_lam0.46_s1 --outdir output
---L 16 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1350 --sample 2 --out_prefix L16_lam0.46_s2 --outdir output
---L 16 --lambda_x 0.46 --lambda_zz 0.54 --lambda 0.46 --ntrials 2000 --seed 1351 --sample 3 --out_prefix L16_lam0.46_s3 --outdir output
---L 16 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1352 --sample 1 --out_prefix L16_lam0.47_s1 --outdir output
---L 16 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1353 --sample 2 --out_prefix L16_lam0.47_s2 --outdir output
---L 16 --lambda_x 0.47 --lambda_zz 0.53 --lambda 0.47 --ntrials 2000 --seed 1354 --sample 3 --out_prefix L16_lam0.47_s3 --outdir output
---L 16 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1355 --sample 1 --out_prefix L16_lam0.48_s1 --outdir output
---L 16 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1356 --sample 2 --out_prefix L16_lam0.48_s2 --outdir output
---L 16 --lambda_x 0.48 --lambda_zz 0.52 --lambda 0.48 --ntrials 2000 --seed 1357 --sample 3 --out_prefix L16_lam0.48_s3 --outdir output
---L 16 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1358 --sample 1 --out_prefix L16_lam0.49_s1 --outdir output
---L 16 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1359 --sample 2 --out_prefix L16_lam0.49_s2 --outdir output
---L 16 --lambda_x 0.49 --lambda_zz 0.51 --lambda 0.49 --ntrials 2000 --seed 1360 --sample 3 --out_prefix L16_lam0.49_s3 --outdir output
---L 16 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1361 --sample 1 --out_prefix L16_lam0.5_s1 --outdir output
---L 16 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1362 --sample 2 --out_prefix L16_lam0.5_s2 --outdir output
---L 16 --lambda_x 0.5 --lambda_zz 0.5 --lambda 0.5 --ntrials 2000 --seed 1363 --sample 3 --out_prefix L16_lam0.5_s3 --outdir output
---L 16 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1364 --sample 1 --out_prefix L16_lam0.51_s1 --outdir output
---L 16 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1365 --sample 2 --out_prefix L16_lam0.51_s2 --outdir output
---L 16 --lambda_x 0.51 --lambda_zz 0.49 --lambda 0.51 --ntrials 2000 --seed 1366 --sample 3 --out_prefix L16_lam0.51_s3 --outdir output
---L 16 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1367 --sample 1 --out_prefix L16_lam0.52_s1 --outdir output
---L 16 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1368 --sample 2 --out_prefix L16_lam0.52_s2 --outdir output
---L 16 --lambda_x 0.52 --lambda_zz 0.48 --lambda 0.52 --ntrials 2000 --seed 1369 --sample 3 --out_prefix L16_lam0.52_s3 --outdir output
---L 16 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1370 --sample 1 --out_prefix L16_lam0.53_s1 --outdir output
---L 16 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1371 --sample 2 --out_prefix L16_lam0.53_s2 --outdir output
---L 16 --lambda_x 0.53 --lambda_zz 0.47 --lambda 0.53 --ntrials 2000 --seed 1372 --sample 3 --out_prefix L16_lam0.53_s3 --outdir output
---L 16 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1373 --sample 1 --out_prefix L16_lam0.54_s1 --outdir output
---L 16 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1374 --sample 2 --out_prefix L16_lam0.54_s2 --outdir output
---L 16 --lambda_x 0.54 --lambda_zz 0.46 --lambda 0.54 --ntrials 2000 --seed 1375 --sample 3 --out_prefix L16_lam0.54_s3 --outdir output
---L 16 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1376 --sample 1 --out_prefix L16_lam0.6_s1 --outdir output
---L 16 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1377 --sample 2 --out_prefix L16_lam0.6_s2 --outdir output
---L 16 --lambda_x 0.6 --lambda_zz 0.4 --lambda 0.6 --ntrials 2000 --seed 1378 --sample 3 --out_prefix L16_lam0.6_s3 --outdir output
---L 16 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1379 --sample 1 --out_prefix L16_lam0.7_s1 --outdir output
---L 16 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1380 --sample 2 --out_prefix L16_lam0.7_s2 --outdir output
---L 16 --lambda_x 0.7 --lambda_zz 0.3 --lambda 0.7 --ntrials 2000 --seed 1381 --sample 3 --out_prefix L16_lam0.7_s3 --outdir output
---L 16 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1382 --sample 1 --out_prefix L16_lam0.8_s1 --outdir output
---L 16 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1383 --sample 2 --out_prefix L16_lam0.8_s2 --outdir output
---L 16 --lambda_x 0.8 --lambda_zz 0.2 --lambda 0.8 --ntrials 2000 --seed 1384 --sample 3 --out_prefix L16_lam0.8_s3 --outdir output
---L 16 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1385 --sample 1 --out_prefix L16_lam0.9_s1 --outdir output
---L 16 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1386 --sample 2 --out_prefix L16_lam0.9_s2 --outdir output
---L 16 --lambda_x 0.9 --lambda_zz 0.1 --lambda 0.9 --ntrials 2000 --seed 1387 --sample 3 --out_prefix L16_lam0.9_s3 --outdir output
+8 0.1 0.9 0.1 2000 1235 1 L8_lam0.1_s1
+8 0.1 0.9 0.1 2000 1236 2 L8_lam0.1_s2
+8 0.1 0.9 0.1 2000 1237 3 L8_lam0.1_s3
+8 0.2 0.8 0.2 2000 1238 1 L8_lam0.2_s1
+8 0.2 0.8 0.2 2000 1239 2 L8_lam0.2_s2
+8 0.2 0.8 0.2 2000 1240 3 L8_lam0.2_s3
+8 0.3 0.7 0.3 2000 1241 1 L8_lam0.3_s1
+8 0.3 0.7 0.3 2000 1242 2 L8_lam0.3_s2
+8 0.3 0.7 0.3 2000 1243 3 L8_lam0.3_s3
+8 0.4 0.6 0.4 2000 1244 1 L8_lam0.4_s1
+8 0.4 0.6 0.4 2000 1245 2 L8_lam0.4_s2
+8 0.4 0.6 0.4 2000 1246 3 L8_lam0.4_s3
+8 0.46 0.54 0.46 2000 1247 1 L8_lam0.46_s1
+8 0.46 0.54 0.46 2000 1248 2 L8_lam0.46_s2
+8 0.46 0.54 0.46 2000 1249 3 L8_lam0.46_s3
+8 0.47 0.53 0.47 2000 1250 1 L8_lam0.47_s1
+8 0.47 0.53 0.47 2000 1251 2 L8_lam0.47_s2
+8 0.47 0.53 0.47 2000 1252 3 L8_lam0.47_s3
+8 0.48 0.52 0.48 2000 1253 1 L8_lam0.48_s1
+8 0.48 0.52 0.48 2000 1254 2 L8_lam0.48_s2
+8 0.48 0.52 0.48 2000 1255 3 L8_lam0.48_s3
+8 0.49 0.51 0.49 2000 1256 1 L8_lam0.49_s1
+8 0.49 0.51 0.49 2000 1257 2 L8_lam0.49_s2
+8 0.49 0.51 0.49 2000 1258 3 L8_lam0.49_s3
+8 0.5 0.5 0.5 2000 1259 1 L8_lam0.5_s1
+8 0.5 0.5 0.5 2000 1260 2 L8_lam0.5_s2
+8 0.5 0.5 0.5 2000 1261 3 L8_lam0.5_s3
+8 0.51 0.49 0.51 2000 1262 1 L8_lam0.51_s1
+8 0.51 0.49 0.51 2000 1263 2 L8_lam0.51_s2
+8 0.51 0.49 0.51 2000 1264 3 L8_lam0.51_s3
+8 0.52 0.48 0.52 2000 1265 1 L8_lam0.52_s1
+8 0.52 0.48 0.52 2000 1266 2 L8_lam0.52_s2
+8 0.52 0.48 0.52 2000 1267 3 L8_lam0.52_s3
+8 0.53 0.47 0.53 2000 1268 1 L8_lam0.53_s1
+8 0.53 0.47 0.53 2000 1269 2 L8_lam0.53_s2
+8 0.53 0.47 0.53 2000 1270 3 L8_lam0.53_s3
+8 0.54 0.46 0.54 2000 1271 1 L8_lam0.54_s1
+8 0.54 0.46 0.54 2000 1272 2 L8_lam0.54_s2
+8 0.54 0.46 0.54 2000 1273 3 L8_lam0.54_s3
+8 0.6 0.4 0.6 2000 1274 1 L8_lam0.6_s1
+8 0.6 0.4 0.6 2000 1275 2 L8_lam0.6_s2
+8 0.6 0.4 0.6 2000 1276 3 L8_lam0.6_s3
+8 0.7 0.3 0.7 2000 1277 1 L8_lam0.7_s1
+8 0.7 0.3 0.7 2000 1278 2 L8_lam0.7_s2
+8 0.7 0.3 0.7 2000 1279 3 L8_lam0.7_s3
+8 0.8 0.2 0.8 2000 1280 1 L8_lam0.8_s1
+8 0.8 0.2 0.8 2000 1281 2 L8_lam0.8_s2
+8 0.8 0.2 0.8 2000 1282 3 L8_lam0.8_s3
+8 0.9 0.1 0.9 2000 1283 1 L8_lam0.9_s1
+8 0.9 0.1 0.9 2000 1284 2 L8_lam0.9_s2
+8 0.9 0.1 0.9 2000 1285 3 L8_lam0.9_s3
+12 0.1 0.9 0.1 2000 1286 1 L12_lam0.1_s1
+12 0.1 0.9 0.1 2000 1287 2 L12_lam0.1_s2
+12 0.1 0.9 0.1 2000 1288 3 L12_lam0.1_s3
+12 0.2 0.8 0.2 2000 1289 1 L12_lam0.2_s1
+12 0.2 0.8 0.2 2000 1290 2 L12_lam0.2_s2
+12 0.2 0.8 0.2 2000 1291 3 L12_lam0.2_s3
+12 0.3 0.7 0.3 2000 1292 1 L12_lam0.3_s1
+12 0.3 0.7 0.3 2000 1293 2 L12_lam0.3_s2
+12 0.3 0.7 0.3 2000 1294 3 L12_lam0.3_s3
+12 0.4 0.6 0.4 2000 1295 1 L12_lam0.4_s1
+12 0.4 0.6 0.4 2000 1296 2 L12_lam0.4_s2
+12 0.4 0.6 0.4 2000 1297 3 L12_lam0.4_s3
+12 0.46 0.54 0.46 2000 1298 1 L12_lam0.46_s1
+12 0.46 0.54 0.46 2000 1299 2 L12_lam0.46_s2
+12 0.46 0.54 0.46 2000 1300 3 L12_lam0.46_s3
+12 0.47 0.53 0.47 2000 1301 1 L12_lam0.47_s1
+12 0.47 0.53 0.47 2000 1302 2 L12_lam0.47_s2
+12 0.47 0.53 0.47 2000 1303 3 L12_lam0.47_s3
+12 0.48 0.52 0.48 2000 1304 1 L12_lam0.48_s1
+12 0.48 0.52 0.48 2000 1305 2 L12_lam0.48_s2
+12 0.48 0.52 0.48 2000 1306 3 L12_lam0.48_s3
+12 0.49 0.51 0.49 2000 1307 1 L12_lam0.49_s1
+12 0.49 0.51 0.49 2000 1308 2 L12_lam0.49_s2
+12 0.49 0.51 0.49 2000 1309 3 L12_lam0.49_s3
+12 0.5 0.5 0.5 2000 1310 1 L12_lam0.5_s1
+12 0.5 0.5 0.5 2000 1311 2 L12_lam0.5_s2
+12 0.5 0.5 0.5 2000 1312 3 L12_lam0.5_s3
+12 0.51 0.49 0.51 2000 1313 1 L12_lam0.51_s1
+12 0.51 0.49 0.51 2000 1314 2 L12_lam0.51_s2
+12 0.51 0.49 0.51 2000 1315 3 L12_lam0.51_s3
+12 0.52 0.48 0.52 2000 1316 1 L12_lam0.52_s1
+12 0.52 0.48 0.52 2000 1317 2 L12_lam0.52_s2
+12 0.52 0.48 0.52 2000 1318 3 L12_lam0.52_s3
+12 0.53 0.47 0.53 2000 1319 1 L12_lam0.53_s1
+12 0.53 0.47 0.53 2000 1320 2 L12_lam0.53_s2
+12 0.53 0.47 0.53 2000 1321 3 L12_lam0.53_s3
+12 0.54 0.46 0.54 2000 1322 1 L12_lam0.54_s1
+12 0.54 0.46 0.54 2000 1323 2 L12_lam0.54_s2
+12 0.54 0.46 0.54 2000 1324 3 L12_lam0.54_s3
+12 0.6 0.4 0.6 2000 1325 1 L12_lam0.6_s1
+12 0.6 0.4 0.6 2000 1326 2 L12_lam0.6_s2
+12 0.6 0.4 0.6 2000 1327 3 L12_lam0.6_s3
+12 0.7 0.3 0.7 2000 1328 1 L12_lam0.7_s1
+12 0.7 0.3 0.7 2000 1329 2 L12_lam0.7_s2
+12 0.7 0.3 0.7 2000 1330 3 L12_lam0.7_s3
+12 0.8 0.2 0.8 2000 1331 1 L12_lam0.8_s1
+12 0.8 0.2 0.8 2000 1332 2 L12_lam0.8_s2
+12 0.8 0.2 0.8 2000 1333 3 L12_lam0.8_s3
+12 0.9 0.1 0.9 2000 1334 1 L12_lam0.9_s1
+12 0.9 0.1 0.9 2000 1335 2 L12_lam0.9_s2
+12 0.9 0.1 0.9 2000 1336 3 L12_lam0.9_s3
+16 0.1 0.9 0.1 2000 1337 1 L16_lam0.1_s1
+16 0.1 0.9 0.1 2000 1338 2 L16_lam0.1_s2
+16 0.1 0.9 0.1 2000 1339 3 L16_lam0.1_s3
+16 0.2 0.8 0.2 2000 1340 1 L16_lam0.2_s1
+16 0.2 0.8 0.2 2000 1341 2 L16_lam0.2_s2
+16 0.2 0.8 0.2 2000 1342 3 L16_lam0.2_s3
+16 0.3 0.7 0.3 2000 1343 1 L16_lam0.3_s1
+16 0.3 0.7 0.3 2000 1344 2 L16_lam0.3_s2
+16 0.3 0.7 0.3 2000 1345 3 L16_lam0.3_s3
+16 0.4 0.6 0.4 2000 1346 1 L16_lam0.4_s1
+16 0.4 0.6 0.4 2000 1347 2 L16_lam0.4_s2
+16 0.4 0.6 0.4 2000 1348 3 L16_lam0.4_s3
+16 0.46 0.54 0.46 2000 1349 1 L16_lam0.46_s1
+16 0.46 0.54 0.46 2000 1350 2 L16_lam0.46_s2
+16 0.46 0.54 0.46 2000 1351 3 L16_lam0.46_s3
+16 0.47 0.53 0.47 2000 1352 1 L16_lam0.47_s1
+16 0.47 0.53 0.47 2000 1353 2 L16_lam0.47_s2
+16 0.47 0.53 0.47 2000 1354 3 L16_lam0.47_s3
+16 0.48 0.52 0.48 2000 1355 1 L16_lam0.48_s1
+16 0.48 0.52 0.48 2000 1356 2 L16_lam0.48_s2
+16 0.48 0.52 0.48 2000 1357 3 L16_lam0.48_s3
+16 0.49 0.51 0.49 2000 1358 1 L16_lam0.49_s1
+16 0.49 0.51 0.49 2000 1359 2 L16_lam0.49_s2
+16 0.49 0.51 0.49 2000 1360 3 L16_lam0.49_s3
+16 0.5 0.5 0.5 2000 1361 1 L16_lam0.5_s1
+16 0.5 0.5 0.5 2000 1362 2 L16_lam0.5_s2
+16 0.5 0.5 0.5 2000 1363 3 L16_lam0.5_s3
+16 0.51 0.49 0.51 2000 1364 1 L16_lam0.51_s1
+16 0.51 0.49 0.51 2000 1365 2 L16_lam0.51_s2
+16 0.51 0.49 0.51 2000 1366 3 L16_lam0.51_s3
+16 0.52 0.48 0.52 2000 1367 1 L16_lam0.52_s1
+16 0.52 0.48 0.52 2000 1368 2 L16_lam0.52_s2
+16 0.52 0.48 0.52 2000 1369 3 L16_lam0.52_s3
+16 0.53 0.47 0.53 2000 1370 1 L16_lam0.53_s1
+16 0.53 0.47 0.53 2000 1371 2 L16_lam0.53_s2
+16 0.53 0.47 0.53 2000 1372 3 L16_lam0.53_s3
+16 0.54 0.46 0.54 2000 1373 1 L16_lam0.54_s1
+16 0.54 0.46 0.54 2000 1374 2 L16_lam0.54_s2
+16 0.54 0.46 0.54 2000 1375 3 L16_lam0.54_s3
+16 0.6 0.4 0.6 2000 1376 1 L16_lam0.6_s1
+16 0.6 0.4 0.6 2000 1377 2 L16_lam0.6_s2
+16 0.6 0.4 0.6 2000 1378 3 L16_lam0.6_s3
+16 0.7 0.3 0.7 2000 1379 1 L16_lam0.7_s1
+16 0.7 0.3 0.7 2000 1380 2 L16_lam0.7_s2
+16 0.7 0.3 0.7 2000 1381 3 L16_lam0.7_s3
+16 0.8 0.2 0.8 2000 1382 1 L16_lam0.8_s1
+16 0.8 0.2 0.8 2000 1383 2 L16_lam0.8_s2
+16 0.8 0.2 0.8 2000 1384 3 L16_lam0.8_s3
+16 0.9 0.1 0.9 2000 1385 1 L16_lam0.9_s1
+16 0.9 0.1 0.9 2000 1386 2 L16_lam0.9_s2
+16 0.9 0.1 0.9 2000 1387 3 L16_lam0.9_s3
