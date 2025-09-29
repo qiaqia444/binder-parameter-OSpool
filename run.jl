@@ -91,7 +91,7 @@ function main()
         lambda_zz = args["lambda_zz"],
         maxdim = args["maxdim"],
         cutoff = args["cutoff"],
-        n_trials = args["ntrials"],
+        ntrials = args["ntrials"],
         chunk4 = args["chunk4"]
     )
     
