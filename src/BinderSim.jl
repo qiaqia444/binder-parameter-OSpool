@@ -126,7 +126,7 @@ function ea_binder_mc(L::Int; lambda_x::Float64, lambda_zz::Float64,
 
     S2_bar = mean(S2s)
     S4_bar = mean(S4s)
-    B_EA   = 1.0 - S4_bar / (3.0*S2_bar^2 + 1e-30)
+    B_EA   = 1.0 - S4_bar / (3.0*S2_bar^2 + eps(Float64))
 
     return (B = B_EA,
             B_mean_of_trials = mean(Bs),
