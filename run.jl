@@ -97,22 +97,23 @@ function main()
     
     # Prepare output data
     output_data = Dict(
-        "method" => "standard_binderSim",
         "L" => args["L"],
         "lambda_x" => args["lambda_x"],
         "lambda_zz" => args["lambda_zz"],
         "lambda" => args["lambda"],
-        "maxdim" => args["maxdim"],
-        "cutoff" => args["cutoff"],
         "ntrials" => args["ntrials"],
         "seed" => args["seed"],
         "sample" => args["sample"],
-        "binder_parameter" => result["binder_parameter"],
-        "chi_parameter" => result["chi_parameter"],
-        "energy" => result["energy"],
-        "correlation_length" => result["correlation_length"],
-        "magnetization" => result["magnetization"],
-        "susceptibility" => result["susceptibility"]
+        "maxdim" => args["maxdim"],
+        "cutoff" => args["cutoff"],
+        "binder_parameter" => result.B,
+        "binder_mean_of_trials" => result.B_mean_of_trials,
+        "binder_std_of_trials" => result.B_std_of_trials,
+        "S2_bar" => result.S2_bar,
+        "S4_bar" => result.S4_bar,
+        "ntrials_completed" => result.ntrials,
+        "measurement_type" => "standard_trajectory",
+        "success" => true
     )
     
     # Create output directory if it doesn't exist
@@ -124,10 +125,8 @@ function main()
         JSON.print(f, output_data, 2)
     end
     
-    println("\nSimulation completed successfully!")
+    println("Success! Binder parameter = $(result.B)")
     println("Results saved to: $output_filename")
-    println("Binder parameter: $(round(result["binder_parameter"], digits=6))")
-    println("Chi parameter: $(round(result["chi_parameter"], digits=6))")
     
     return 0
 end
