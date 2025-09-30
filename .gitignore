@@ -7,3 +7,18 @@ status
 /analysis_results/
 /downloaded_results/
 *.tar.gz
+
+# Results directories
+results/
+my_standard_results/
+backup_results/
+
+# Additional temporary files
+*.tmp
+*.temp
+*~
+
+# Julia temporary files
+*.jl.*.cov
+*.jl.cov
+*.jl.mem
