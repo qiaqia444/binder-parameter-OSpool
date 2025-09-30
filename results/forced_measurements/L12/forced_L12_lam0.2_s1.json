@@ -1,0 +1,19 @@
+{
+  "ntrials_completed": 2000,
+  "S4_bar": 0.9985284190043244,
+  "measurement_type": "forced_plus_one",
+  "success": true,
+  "lambda_x": 0.2,
+  "S2_bar": 0.9991188652021228,
+  "L": 12,
+  "lambda_zz": 0.8,
+  "cutoff": 1.0e-12,
+  "binder_mean_of_trials": 0.666569858739647,
+  "binder_parameter": 0.6665698587396461,
+  "ntrials": 2000,
+  "lambda": 0.2,
+  "maxdim": 256,
+  "sample": 1,
+  "binder_std_of_trials": 2.221001369016217e-16,
+  "seed": 1289
+}
