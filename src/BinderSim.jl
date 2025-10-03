@@ -49,6 +49,7 @@ function sample_and_apply(ψ::MPS, K0::ITensor, K1::ITensor, which::Vector{Int};
     p0 = max(real(inner(dag(ϕ0), ϕ0)), 0.0)
     ϕ1 = product(K1, ψ, which; maxdim=maxdim, cutoff=cutoff)
     p1 = max(real(inner(dag(ϕ1), ϕ1)), 0.0)
+    # Check
     tot = p0 + p1
     ϕ = (tot <= 0) ? ϕ0 : (rand(rng) < p0/tot ? ϕ0 : ϕ1)
     orthogonalize!(ϕ, which[end])
@@ -64,6 +65,7 @@ function evolve_one_trial(L::Int; lambda_x::Float64, lambda_zz::Float64,
     T_max = 2L
     for _ in 1:T_max
         # weak X on all sites - random sampling
+        # check random
         for i in 1:L
             ψ = sample_and_apply(ψ, KX0[i], KX1[i], [i]; maxdim=maxdim, cutoff=cutoff, rng=rng)
         end
