@@ -14,21 +14,67 @@ mkdir -p $RESULTS_DIR
 echo "Collecting results into: $RESULTS_DIR"
 
 # Copy all standard job output files with correct naming pattern
-echo "Copying JSON result files..."
-find output -name "standard_L*_lam*_s*.json" -type f | while read file; do
-    if [ -f "$file" ]; then
-        cp "$file" "$RESULTS_DIR/"
-        echo "  Copied: $file"
+echo "Searching for standard result files..."
+echo "Looking for pattern: standard_L*_lam*_s*.json"
+
+# Check multiple possible output locations
+SEARCH_DIRS="output jobs/output . ./output ./jobs/output"
+
+FOUND_FILES=""
+for dir in $SEARCH_DIRS; do
+    if [ -d "$dir" ]; then
+        echo "Searching in: $dir"
+        FILES_IN_DIR=$(find "$dir" -name "standard_L*_lam*_s*.json" -type f 2>/dev/null)
+        if [ ! -z "$FILES_IN_DIR" ]; then
+            FOUND_FILES="$FOUND_FILES $FILES_IN_DIR"
+            echo "  Found $(echo $FILES_IN_DIR | wc -w) files in $dir"
+        fi
     fi
 done
 
-# Also check for any other standard result patterns as backup
-find output -name "standard_*.json" -type f | while read file; do
-    if [ -f "$file" ]; then
-        cp "$file" "$RESULTS_DIR/"
-        echo "  Copied: $file"
-    fi
-done
+if [ -z "$FOUND_FILES" ]; then
+    echo "No files found with pattern standard_L*_lam*_s*.json"
+    echo "Searching for any standard*.json files in all directories..."
+    for dir in $SEARCH_DIRS; do
+        if [ -d "$dir" ]; then
+            FILES_IN_DIR=$(find "$dir" -name "standard*.json" -type f 2>/dev/null)
+            if [ ! -z "$FILES_IN_DIR" ]; then
+                FOUND_FILES="$FOUND_FILES $FILES_IN_DIR"
+                echo "  Found standard*.json files in $dir"
+            fi
+        fi
+    done
+fi
+
+if [ -z "$FOUND_FILES" ]; then
+    echo "No standard result files found at all!"
+    echo ""
+    echo "Directory diagnostics:"
+    for dir in $SEARCH_DIRS; do
+        if [ -d "$dir" ]; then
+            echo "Contents of $dir:"
+            ls -la "$dir" | head -5
+            echo ""
+        else
+            echo "$dir: directory not found"
+        fi
+    done
+else
+    echo ""
+    echo "Found files:"
+    for file in $FOUND_FILES; do
+        echo "  $file"
+    done
+    
+    echo ""
+    echo "Copying files..."
+    for file in $FOUND_FILES; do
+        if [ -f "$file" ]; then
+            cp "$file" "$RESULTS_DIR/"
+            echo "  Copied: $file"
+        fi
+    done
+fi
 
 # Copy parameter files for reference
 echo "Copying parameter files..."
@@ -56,7 +102,8 @@ Files Collected:
 $(find "$RESULTS_DIR" -type f | wc -l) total files
 
 JSON Results:
-$(find "$RESULTS_DIR" -name "*.json" | grep -v summary | wc -l) result files
+$(find "$RESULTS_DIR" -name "standard*.json" | wc -l) standard result files
+$(find "$RESULTS_DIR" -name "*.json" | grep -v summary | wc -l) total JSON files
 
 File List:
 $(find "$RESULTS_DIR" -type f | sort)
