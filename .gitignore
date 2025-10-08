@@ -12,6 +12,35 @@ status
 results/
 my_standard_results/
 backup_results/
+standard_results_*/
+large_standard_results_*/
+*_results_*/
+
+# Job output and data files
+jobs/output/
+jobs/logs/
+*.json
+*.out
+*.err
+
+# Archive files
+*.tar.gz
+*.tar
+*.zip
+
+# Analysis outputs
+*.png
+*.pdf
+*.svg
+*.csv
+*.txt
+binder_*.png
+standard_*.png
+scaling_*.png
+
+# But keep parameter files (important configuration)
+!jobs/params*.txt
+!jobs/*params*.txt
 
 # Additional temporary files
 *.tmp
@@ -22,3 +51,12 @@ backup_results/
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
+
+# HTCondor files
+*.log
+condor_*.log
+
+# Backup and swap files
+*.bak
+*.swp
+*.swo

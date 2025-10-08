@@ -1,0 +1,32 @@
+# HTCondor submit file for Standard BinderSim
+# This runs Edwards-Anderson simulations with random measurement outcomes
+
+universe              = vanilla
+executable            = run_standard.sh
+arguments             = $(L) $(lambda_x) $(lambda_zz) $(lambda) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs
+transfer_input_files  = ../src, ../Project.toml, ../Manifest.toml, ../run.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/standard_$(L)_$(lambda)_$(sample).out
+error                 = logs/standard_$(L)_$(lambda)_$(sample).err
+log                   = logs/standard_condor.log
+
++JobDurationCategory = "Medium"
+
+# Resources
+request_cpus          = 4
+request_memory        = 8 GB
+request_disk          = 8 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# Generate jobs for each combination
+# One job per line in params_large_standard.txt
+queue L lambda_x lambda_zz lambda ntrials seed sample out_prefix from params_large_standard.txt
