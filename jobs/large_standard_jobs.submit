@@ -2,7 +2,7 @@
 # This runs Edwards-Anderson simulations with random measurement outcomes
 
 universe              = vanilla
-executable            = run_standard.sh
+executable            = run_standard_large.sh
 arguments             = $(L) $(lambda_x) $(lambda_zz) $(lambda) $(ntrials) $(seed) $(sample) $(out_prefix)
 
 # Send only what the job needs
