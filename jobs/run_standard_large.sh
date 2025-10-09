@@ -38,13 +38,21 @@ julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 echo "Running large standard simulation (L=$L)..."
 echo "Command: julia --project=. run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir output"
 
-# Set optimal threading for large systems
+# Set optimal threading and memory for large systems
 export JULIA_NUM_THREADS=4
 export OPENBLAS_NUM_THREADS=4
 export MKL_NUM_THREADS=4
+export JULIA_MAX_NUM_PRECOMPILE_FILES=10  # Reduce memory usage
 
-# Run with optimized settings for large L
-julia --project=. -t 4 run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir output
+# Add progress reporting for large L
+echo "Starting large system simulation: L=$L (expected runtime: $([ $L -le 24 ] && echo "2-8 hours" || [ $L -le 32 ] && echo "8-32 hours" || echo "24-48 hours"))"
+
+# Run with optimized settings for large L with reduced chunk size for L>=28
+if [ $L -ge 28 ]; then
+    julia --project=. -t 4 run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir output --chunk4 10000
+else
+    julia --project=. -t 4 run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --lambda $lambda --ntrials $ntrials --seed $seed --sample $sample --out_prefix $out_prefix --outdir output
+fi
 EXIT_CODE=$?
 
 echo "Simulation completed with exit code: $EXIT_CODE"

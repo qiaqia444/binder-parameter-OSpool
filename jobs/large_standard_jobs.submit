@@ -1,5 +1,5 @@
-# HTCondor submit file for Standard BinderSim
-# This runs Edwards-Anderson simulations with random measurement outcomes
+# HTCondor submit file for Large Standard BinderSim (L=20-36)
+# This runs Edwards-Anderson simulations with random measurement outcomes for large systems
 
 universe              = vanilla
 executable            = run_standard_large.sh
@@ -17,12 +17,14 @@ output                = logs/standard_$(L)_$(lambda)_$(sample).out
 error                 = logs/standard_$(L)_$(lambda)_$(sample).err
 log                   = logs/standard_condor.log
 
-+JobDurationCategory = "Medium"
+# Extended resources for large systems (L=20-36)
++JobDurationCategory = "Long"
++MaxRuntime = 172800    # 48 hours (was causing timeouts at 20h)
 
-# Resources
-request_cpus          = 4
-request_memory        = 8 GB
-request_disk          = 8 GB
+# Increased resources for large systems
+request_cpus          = 4        # Same as before 
+request_memory        = 12 GB    # Increased from 8GB
+request_disk          = 10 GB    # Increased from 8GB
 
 # Use your working container
 container_image = /ospool/ap40/data/qia.wang/container.sif
