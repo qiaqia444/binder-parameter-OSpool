@@ -19,12 +19,15 @@ log                   = logs/standard_condor.log
 
 # Extended resources for large systems (L=20-36)
 +JobDurationCategory = "Long"
-+MaxRuntime = 172800    # 48 hours (was causing timeouts at 20h)
+# 48 hours runtime (was causing timeouts at 20h)
++MaxRuntime = 172800
 
 # Increased resources for large systems
-request_cpus          = 4        # Same as before 
-request_memory        = 12 GB    # Increased from 8GB
-request_disk          = 10 GB    # Increased from 8GB
+request_cpus          = 4
+# Memory increased from 8GB to 12GB for large systems
+request_memory        = 12 GB
+# Disk increased from 8GB to 10GB for large systems  
+request_disk          = 10 GB
 
 # Use your working container
 container_image = /ospool/ap40/data/qia.wang/container.sif
