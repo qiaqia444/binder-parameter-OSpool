@@ -19,15 +19,12 @@ log                   = logs/scaling_critical_condor.log
 
 # Enhanced resources for critical scaling jobs (L=24-36 at lambda=0.5)
 +JobDurationCategory = "Long"
-# 72 hours runtime (enhanced from 48h for critical jobs)
-+MaxRuntime = 259200
+# 48 hours runtime
++MaxRuntime = 172800
 
-# Enhanced resources for critical scaling analysis
 request_cpus          = 4
-# Memory enhanced from 12GB to 16GB for critical jobs
-request_memory        = 16 GB
-# Disk enhanced from 10GB to 20GB for critical jobs
-request_disk          = 20 GB
+request_memory        = 12 GB
+request_disk          = 12 GB
 
 # Use your working container
 container_image = /ospool/ap40/data/qia.wang/container.sif
