@@ -1,0 +1,37 @@
+# HTCondor submit file for Critical Scaling Analysis (L=24,28,32,36 at lambda=0.5)
+# This runs Edwards-Anderson simulations for critical scaling analysis with enhanced resources
+
+universe              = vanilla
+executable            = run_scaling_critical.sh
+arguments             = $(L) $(lambda_x) $(lambda_zz) $(lambda) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs
+transfer_input_files  = ../src, ../Project.toml, ../Manifest.toml, ../run.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/scaling_critical_$(L)_$(lambda)_$(sample).out
+error                 = logs/scaling_critical_$(L)_$(lambda)_$(sample).err
+log                   = logs/scaling_critical_condor.log
+
+# Enhanced resources for critical scaling jobs (L=24-36 at lambda=0.5)
++JobDurationCategory = "Long"
+# 72 hours runtime (enhanced from 48h for critical jobs)
++MaxRuntime = 259200
+
+# Enhanced resources for critical scaling analysis
+request_cpus          = 4
+# Memory enhanced from 12GB to 16GB for critical jobs
+request_memory        = 16 GB
+# Disk enhanced from 10GB to 20GB for critical jobs
+request_disk          = 20 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# Generate jobs for each combination
+# One job per line in params_scaling_critical.txt
+queue L lambda_x lambda_zz lambda ntrials seed sample out_prefix from params_scaling_critical.txt
