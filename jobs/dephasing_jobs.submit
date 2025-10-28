@@ -1,0 +1,31 @@
+# HTCondor submit file for Dephasing Channel BinderSim
+# This runs simulations with weak measurements + dephasing channels
+
+universe              = vanilla
+executable            = run_dephasing.sh
+arguments             = $(L) $(P_x) $(lambda_x) $(lambda_zz) $(lambda) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs
+transfer_input_files  = ../src, ../Project.toml, ../Manifest.toml, ../run_dephasing.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/dephasing_$(L)_lam$(lambda)_P$(P_x)_s$(sample).out
+error                 = logs/dephasing_$(L)_lam$(lambda)_P$(P_x)_s$(sample).err
+log                   = logs/dephasing_condor.log
+
++JobDurationCategory = "Medium"
+
+# Resources
+request_cpus          = 4
+request_memory        = 8 GB
+request_disk          = 8 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# One job per line in params_dephasing.txt
+queue L P_x lambda_x lambda_zz lambda ntrials seed sample out_prefix from params_dephasing.txt
