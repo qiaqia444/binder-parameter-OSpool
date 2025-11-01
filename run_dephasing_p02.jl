@@ -128,7 +128,7 @@ function main()
     mkpath("output")
     
     # Save results
-    output_filename = "output/$(out_prefix)_L$(L)_lam$(lambda)_P$(P_x)_s$(sample).json"
+    output_filename = "output/$(out_prefix).json"
     open(output_filename, "w") do f
         JSON.print(f, output_data, 2)
     end
