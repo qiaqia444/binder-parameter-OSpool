@@ -28,6 +28,17 @@ echo "Sample:             sample = $sample"
 echo "Output prefix:      $out_prefix"
 echo "========================================"
 
+# Create output directory
+mkdir -p output
+
+# Check Julia version
+echo "Julia version:"
+julia --version
+
+# Install packages
+echo "Setting up Julia environment..."
+julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
 # Run the Julia script
 julia --project=. run_dephasing_p02.jl \
     --L $L \
@@ -41,6 +52,10 @@ julia --project=. run_dephasing_p02.jl \
     --out_prefix $out_prefix
 
 exit_code=$?
+
+# List output files
+echo "Output files created:"
+ls -la output/ 2>/dev/null || echo "No output directory found"
 
 echo "========================================"
 echo "Simulation completed with exit code: $exit_code"
