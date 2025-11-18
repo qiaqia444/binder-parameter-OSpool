@@ -11,11 +11,9 @@ using Plots
 function load_p05_results()
     """Load P=0.5 results and compute statistics."""
     
-    # Try both possible locations
-    result_dirs = [
-        "dephasing_p05_results_20251111_1727",
-        "jobs/results_dephasing_p05"
-    ]
+    # Find any directory matching the pattern
+    result_dirs = filter(d -> startswith(d, "dephasing_p05_results_") && isdir(d), readdir())
+    push!(result_dirs, "jobs/results_dephasing_p05")
     
     results = []
     for dir in result_dirs

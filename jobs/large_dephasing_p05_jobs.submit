@@ -1,0 +1,55 @@
+# HTCondor submit file for Large Dephasing P=0.5 BinderSim (L=20-36)
+# This runs simulations with weak measurements + dephasing channels (P=0.5) for large systems
+
+universe              = vanilla
+executable            = run_dephasing_p05_large.sh
+arguments             = $(L) $(P_x) $(lambda_x) $(lambda_zz) $(lambda) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs
+transfer_input_files  = ../src, ../Project.toml, ../Manifest.toml, ../run_dephasing_p05.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/large_dephasing_p05_$(L)_lam$(lambda)_P$(P_x)_s$(sample).out
+error                 = logs/large_dephasing_p05_$(L)_lam$(lambda)_P$(P_x)_s$(sample).err
+log                   = logs/large_dephasing_p05_condor.log
+
+# Extended resources for large systems (L=20-36)
++JobDurationCategory = "Long"
+# 72 hours runtime for large dephasing systems (increased for completion)
++MaxRuntime = 259200
+
+# Increased resources for large systems
+request_cpus          = 4
+# Memory increased from 8GB to 12GB for large systems
+request_memory        = 12 GB
+# Disk increased from 8GB to 10GB for large systems  
+request_disk          = 10 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# Improve job matching and reduce idle time
+# Only run on sites that have shown good performance
+requirements = (OSGVO_OS_STRING == "RHEL 9") || (OSGVO_OS_STRING == "RHEL 8") || (OSGVO_OS_STRING == "RHEL 7")
+
+# Retry policy for better completion rate
+# Retry failed jobs up to 2 times
+max_retries = 2
+
+# Periodic hold/release to prevent stuck jobs
+# Release held jobs once
+periodic_release = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 1800)
+
+# Remove jobs that have been held too many times
+periodic_remove = (JobStatus == 5) && (HoldReasonCode == 3) && (NumJobStarts > 3)
+
+# Allow some preemption but prioritize completion
++WantFlocking = True
++WantGlidein = True
+
+# One job per line in params_large_dephasing_p05.txt
+queue L P_x lambda_x lambda_zz lambda ntrials seed sample out_prefix from params_large_dephasing_p05.txt
