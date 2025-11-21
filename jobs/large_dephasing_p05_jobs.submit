@@ -1,5 +1,6 @@
-# HTCondor submit file for Large Dephasing P=0.5 BinderSim (L=20-36)
-# This runs simulations with weak measurements + dephasing channels (P=0.5) for large systems
+# HTCondor submit file for Large Dephasing P=0.5 BinderSim (L=24-36)
+# ULTRA-FAST VERSION: Many small jobs for maximum parallelization
+# Note: L=20 already complete, only running L=24,28,32,36
 
 universe              = vanilla
 executable            = run_dephasing_p05_large.sh
@@ -17,17 +18,17 @@ output                = logs/large_dephasing_p05_$(L)_lam$(lambda)_P$(P_x)_s$(sa
 error                 = logs/large_dephasing_p05_$(L)_lam$(lambda)_P$(P_x)_s$(sample).err
 log                   = logs/large_dephasing_p05_condor.log
 
-# Extended resources for large systems (L=20-36)
+# ULTRA-FAST VERSION: Many small jobs for maximum parallelization (250 trials instead of 2000)
 +JobDurationCategory = "Long"
-# 72 hours runtime for large dephasing systems (increased for completion)
-+MaxRuntime = 259200
+# 48 hours runtime (safer buffer for large systems)
++MaxRuntime = 172800
 
-# Increased resources for large systems
+# Resources for fast jobs
 request_cpus          = 4
-# Memory increased from 8GB to 12GB for large systems
-request_memory        = 12 GB
-# Disk increased from 8GB to 10GB for large systems  
-request_disk          = 10 GB
+# Memory reduced since fewer trials per job
+request_memory        = 10 GB
+# Disk for results  
+request_disk          = 8 GB
 
 # Use your working container
 container_image = /ospool/ap40/data/qia.wang/container.sif

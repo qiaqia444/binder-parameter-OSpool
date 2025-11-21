@@ -6,8 +6,8 @@ Generate parameter file for Large Dephasing P=0.5 jobs (L=20,24,28,32,36)
 
 using Printf
 
-# System sizes for large systems
-L_values = [20, 24, 28, 32, 36]
+# System sizes for large systems (L=20 already complete, only need L=24,28,32,36)
+L_values = [24, 28, 32, 36]
 
 # Lambda values (same as small systems)
 lambda_values = [0.1, 0.2, 0.3, 0.4, 0.48, 0.49, 0.5, 0.51, 0.52, 0.53, 0.54, 0.6, 0.7, 0.8, 0.9]
@@ -16,10 +16,11 @@ lambda_values = [0.1, 0.2, 0.3, 0.4, 0.48, 0.49, 0.5, 0.51, 0.52, 0.53, 0.54, 0.
 P_x = 0.5
 
 # Number of samples per configuration
-n_samples = 3
+# FAST VERSION: Even more samples with fewer trials for maximum parallelization
+n_samples = 24  # Was 12, now 24 (even more parallel jobs!)
 
 # Number of trials per job
-ntrials = 2000
+ntrials = 250  # Was 500, now 250 (2× faster, same total: 24×250 = 6000 trials per point)
 
 # Starting seed for large dephasing (use 7000+ range to avoid conflicts)
 seed_start = 7001
@@ -48,7 +49,11 @@ end
 # Count jobs
 n_jobs = length(L_values) * length(lambda_values) * n_samples
 println("Generated $n_jobs jobs:")
-println("  L values: $(L_values)")
+println("  L values: $(L_values) (excluding L=20)")
 println("  λ values: $(length(lambda_values)) points")
 println("  Samples: $n_samples")
+println("  Trials per job: $ntrials")
+println("  Total trials per (L,λ): $(n_samples * ntrials)")
 println("  Seeds: $seed_start to $(seed_start + n_jobs - 1)")
+println("")
+println("ULTRA-FAST strategy: 8× more jobs, each 8× faster, same total statistics!")
