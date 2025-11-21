@@ -30,11 +30,13 @@ seed_start = 9001
 open("params_rbim.txt", "w") do f
     seed = seed_start
     
-    for P_x in P_x_values
+    # Group by (L, lambda_zz) first, then scan over P
+    # This makes it easier to plot Binder vs P for each (L, lambda_zz)
+    for lambda_zz in lambda_zz_values
         for L in L_values
-            for lambda_zz in lambda_zz_values
+            for P_x in P_x_values
                 for sample in 1:n_samples
-                    out_prefix = @sprintf("rbim_L%d_lzz%.2f_P%.1f_s%d", L, lambda_zz, P_x, sample)
+                    out_prefix = @sprintf("rbim_L%d_lzz%.2f_P%.2f_s%d", L, lambda_zz, P_x, sample)
                     
                     # Format: L P_x lambda_zz ntrials seed sample out_prefix
                     println(f, "$L $P_x $lambda_zz $ntrials $seed $sample $out_prefix")
