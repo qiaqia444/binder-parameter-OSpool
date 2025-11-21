@@ -15,7 +15,8 @@ sample=$8
 out_prefix=$9
 
 echo "========================================"
-echo "Dephasing P=0.5 Simulation Starting"
+echo "Dephasing P=0.5 (CORRECTED)"
+echo "Proper quantum channel implementation"
 echo "========================================"
 echo "System size:        L = $L"
 echo "Dephasing prob:     P_x = $P_x"
@@ -26,6 +27,7 @@ echo "Trials:             ntrials = $ntrials"
 echo "Seed:               seed = $seed"
 echo "Sample:             sample = $sample"
 echo "Output prefix:      $out_prefix"
+echo "CORRECTED VERSION - Proper quantum channel"
 echo "========================================"
 
 # Create output directory

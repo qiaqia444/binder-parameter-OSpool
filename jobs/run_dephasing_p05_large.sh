@@ -15,7 +15,8 @@ sample=$8
 out_prefix=$9
 
 echo "========================================"
-echo "Large Dephasing P=0.5 Simulation Starting"
+echo "Large Dephasing P=0.5 (CORRECTED)"
+echo "Proper quantum channel implementation"
 echo "========================================"
 echo "System size:        L = $L"
 echo "Dephasing prob:     P_x = $P_x"

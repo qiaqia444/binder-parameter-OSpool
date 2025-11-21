@@ -64,33 +64,59 @@ end
 
 function apply_x_dephasing(ψ::MPS, site::Int, P_x::Float64, sites; 
                            maxdim::Int=256, cutoff::Float64=1e-12, rng=Random.GLOBAL_RNG)
-    """Apply X dephasing channel with probability P_x"""
+    """
+    Apply X dephasing channel: ρ → (1-P_x)ρ + P_x·X·ρ·X
+    
+    For pure state trajectories:
+    - With probability (1-P_x): apply √(1-P_x)·I (keep state)
+    - With probability P_x: apply √P_x·X (flip state)
+    
+    This samples from the quantum channel mixture.
+    """
     P_x <= 0 && return ψ
-    if P_x >= 1
-        X_gate = 2 * op("Sx", sites[site])  # Pauli X = 2*Sx
-        return apply_single_site_gate(ψ, site, X_gate; maxdim=maxdim, cutoff=cutoff)
-    end
+    
+    # Sample which Kraus operator to apply
     if rand(rng) < P_x
-        X_gate = 2 * op("Sx", sites[site])
-        return apply_single_site_gate(ψ, site, X_gate; maxdim=maxdim, cutoff=cutoff)
+        # Apply Kraus operator K₁ = √P_x · X
+        X_gate = 2 * op("Sx", sites[site])  # Pauli X = 2*Sx
+        ψ_new = apply_single_site_gate(ψ, site, X_gate; maxdim=maxdim, cutoff=cutoff)
+        # Renormalize (the √P_x factor is handled by the probabilistic sampling)
+        normalize!(ψ_new)
+        return ψ_new
     else
-        return ψ  # identity branch
+        # Apply Kraus operator K₀ = √(1-P_x) · I (identity)
+        return ψ
     end
 end
 
 function apply_zz_dephasing(ψ::MPS, i::Int, j::Int, P_zz::Float64, sites;
                             maxdim::Int=256, cutoff::Float64=1e-12, rng=Random.GLOBAL_RNG)
-    """Apply ZZ dephasing channel with probability P_zz"""
+    """
+    Apply ZZ dephasing channel: ρ → (1-P_zz)ρ + P_zz·(Z⊗Z)·ρ·(Z⊗Z)
+    
+    For pure state trajectories:
+    - With probability (1-P_zz): apply √(1-P_zz)·I (keep state)
+    - With probability P_zz: apply √P_zz·(Z⊗Z) (apply ZZ)
+    
+    This samples from the quantum channel mixture.
+    """
     P_zz <= 0 && return ψ
     if abs(i-j) != 1
         return ψ
     end
-    if P_zz >= 1 || rand(rng) < P_zz
+    
+    # Sample which Kraus operator to apply
+    if rand(rng) < P_zz
+        # Apply Kraus operator K₁ = √P_zz · (Z⊗Z)
         Z_i = 2 * op("Sz", sites[i])  # Pauli Z = 2*Sz
         Z_j = 2 * op("Sz", sites[j])
         ZZ = Z_i * Z_j
-        return apply_two_site_gate(ψ, i, j, ZZ; maxdim=maxdim, cutoff=cutoff)
+        ψ_new = apply_two_site_gate(ψ, i, j, ZZ; maxdim=maxdim, cutoff=cutoff)
+        # Renormalize (the √P_zz factor is handled by the probabilistic sampling)
+        normalize!(ψ_new)
+        return ψ_new
     else
+        # Apply Kraus operator K₀ = √(1-P_zz) · I (identity)
         return ψ
     end
 end

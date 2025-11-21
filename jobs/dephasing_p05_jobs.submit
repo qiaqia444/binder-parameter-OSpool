@@ -1,5 +1,6 @@
-# HTCondor submit file for Dephasing Channel P=0.5 BinderSim
-# This runs simulations with weak measurements + dephasing channels (P=0.5)
+# HTCondor submit file for Dephasing Channel P=0.5 BinderSim (L=8,12,16,20) CORRECTED
+# CORRECTED VERSION: Proper quantum channel (1-p)ρ + p·X·ρ·X
+# Increased parallelization: 680 jobs (was 153)
 
 universe              = vanilla
 executable            = run_dephasing_p05.sh

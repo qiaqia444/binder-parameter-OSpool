@@ -1,6 +1,7 @@
-# HTCondor submit file for Large Dephasing P=0.5 BinderSim (L=24-36)
-# ULTRA-FAST VERSION: Many small jobs for maximum parallelization
-# Note: L=20 already complete, only running L=24,28,32,36
+# HTCondor submit file for Large Dephasing P=0.5 BinderSim (L=24-36) CORRECTED
+# CORRECTED VERSION: Proper quantum channel (1-p)ρ + p·X·ρ·X
+# Many small jobs for maximum parallelization
+# Note: L=20 is in small systems jobs
 
 universe              = vanilla
 executable            = run_dephasing_p05_large.sh
