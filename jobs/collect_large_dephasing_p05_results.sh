@@ -18,7 +18,7 @@ mkdir -p ${RESULTS_DIR}
 
 # Find and copy large dephasing P=0.5 result files (excluding L=20, already collected)
 echo "Searching for large_dephasing_p05_*.json files (L=24,28,32,36)..."
-find output -name "large_dephasing_p05_L2[4,8]_*.json" -o -name "large_dephasing_p05_L3[2,6]_*.json" -type f -exec cp {} ${RESULTS_DIR}/ \;
+find . -name "large_dephasing_p05_L24_*.json" -o -name "large_dephasing_p05_L28_*.json" -o -name "large_dephasing_p05_L32_*.json" -o -name "large_dephasing_p05_L36_*.json" | while read file; do cp "$file" ${RESULTS_DIR}/; done
 
 # Count files
 NUM_FILES=$(ls -1 ${RESULTS_DIR}/*.json 2>/dev/null | wc -l)
