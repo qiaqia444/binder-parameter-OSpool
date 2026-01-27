@@ -121,9 +121,18 @@ P_values = sort(unique([k[2] for k in keys(binder_data)]))
 println("\nSystem sizes: $L_values")
 println("Dephasing strengths: $P_values")
 
-# Create plots: Binder vs P at each λ_zz (looking for Nishimori point)
-lambda_zz_values = sort(unique([k[2] for (L, P) in keys(binder_data) for k in [(P, get(binder_data, (L, P), ([],))[1])] if !isempty(k[2])]))
+# Get unique lambda_zz values from the data
+lambda_zz_set = Set{Float64}()
+for ((L, P_x), (lambdas, binders, errors)) in binder_data
+    for lz in lambdas
+        push!(lambda_zz_set, lz)
+    end
+end
+lambda_zz_values = sort(collect(lambda_zz_set))
 
+println("\nλ_zz values found: $lambda_zz_values")
+
+# Create plots: Binder vs P at each λ_zz (looking for Nishimori point)
 for lambda_zz in lambda_zz_values
     println("\nGenerating plot for λ_zz=$lambda_zz...")
     
