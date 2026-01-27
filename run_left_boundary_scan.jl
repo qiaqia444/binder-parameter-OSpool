@@ -90,6 +90,11 @@ function parse_commandline()
             help = "Output directory"
             arg_type = String
             default = "left_boundary_results"
+        
+        "--output_file"
+            help = "Output filename (optional, for cluster jobs)"
+            arg_type = String
+            default = ""
     end
     
     return parse_args(s)
@@ -111,6 +116,7 @@ function main()
     cutoff = args["cutoff"]
     seed = args["seed"]
     output_dir = args["output_dir"]
+    output_file = args["output_file"]
     
     println("="^70)
     println("LEFT BOUNDARY SCAN: Dephasing-Induced Phase Transition")
@@ -206,9 +212,16 @@ function main()
         println("  Time: $(round(t_elapsed, digits=1)) seconds")
         
         # Save intermediate results
-        timestamp = Dates.format(now(), "yyyymmdd_HHMM")
-        output_file = joinpath(output_dir, "left_boundary_L$(L)_lambda$(lambda_x)_$(timestamp).json")
-        open(output_file, "w") do f
+        if !isempty(output_file)
+            # Use specified filename for cluster jobs
+            outpath = joinpath(output_dir, output_file)
+        else
+            # Use timestamped filename for local runs
+            timestamp = Dates.format(now(), "yyyymmdd_HHMM")
+            outpath = joinpath(output_dir, "left_boundary_L$(L)_lambda$(lambda_x)_$(timestamp).json")
+        end
+        
+        open(outpath, "w") do f
             JSON.print(f, results, 4)
         end
     end
@@ -220,13 +233,15 @@ function main()
     println("Output saved to: $output_dir/")
     
     # Final save
-    timestamp = Dates.format(Dates.now(), "yyyymmdd_HHMM")
-    final_output = joinpath(output_dir, "left_boundary_L$(L)_lambda$(lambda_x)_$(timestamp)_final.json")
-    open(final_output, "w") do f
-        JSON.print(f, results, 4)
+    if isempty(output_file)
+        timestamp = Dates.format(Dates.now(), "yyyymmdd_HHMM")
+        final_output = joinpath(output_dir, "left_boundary_L$(L)_lambda$(lambda_x)_$(timestamp)_final.json")
+        open(final_output, "w") do f
+            JSON.print(f, results, 4)
+        end
+        
+        println("Final results: $final_output")
     end
-    
-    println("Final results: $final_output")
     println()
     
     # Print summary statistics

@@ -37,7 +37,7 @@ julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
 # Run left boundary scan simulation
 echo "Running left boundary scan with density matrix evolution..."
-echo "Command: julia --project=. run_left_boundary_scan.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --P_min $P_x --P_max $P_x --P_steps 1 --P_zz_mode fixed --P_zz_value $P_zz --trials $ntrials --seed $seed --outdir output --outfile ${out_prefix}.json"
+echo "Command: julia --project=. run_left_boundary_scan.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --P_min $P_x --P_max $P_x --P_steps 1 --P_zz_mode fixed --P_zz_value $P_zz --ntrials $ntrials --seed $seed --output_dir output --output_file ${out_prefix}.json"
 
 julia --project=. run_left_boundary_scan.jl \
     --L $L \
@@ -48,10 +48,10 @@ julia --project=. run_left_boundary_scan.jl \
     --P_steps 1 \
     --P_zz_mode fixed \
     --P_zz_value $P_zz \
-    --trials $ntrials \
+    --ntrials $ntrials \
     --seed $seed \
-    --outdir output \
-    --outfile ${out_prefix}.json
+    --output_dir output \
+    --output_file ${out_prefix}.json
 
 EXIT_CODE=$?
 
