@@ -1,47 +1,34 @@
 """
-Density matrix evolution for measurement-induced phase transitions with dephasing.
+Density matrix evolution with MixedStateMPS (full density matrix).
 
-This module implements the CORRECT approach for systems with both weak measurements
-and dephasing channels: evolving DiagonalStateMPS (density matrices) instead of
-pure state quantum trajectories.
+This is the CORRECT implementation for dephasing. Uses full density matrix representation
+in the doubled (Choi-Jamiolkowski) MPS form.
 
-Key difference from dynamics.jl:
-- dynamics.jl: Pure state trajectories (stochastic dephasing) - WRONG for dephasing
-- This file: Density matrix evolution (deterministic dephasing) - CORRECT for dephasing
+Key: MixedStateMPS represents ρ as a "doubled" MPS where indices come in pairs (bra, ket).
+Sites 2i-1 = bra, sites 2i = ket. This allows representing general mixed states.
+
+Based on src_1/MPS implementation patterns.
 """
 
 using Random, Statistics
 using ITensors, ITensorMPS
 using LinearAlgebra
 
-# Note: Assumes types.jl, channels.jl are already loaded in the calling context
-# These functions work with DiagonalStateMPS from types.jl
-
 export evolve_density_matrix_one_trial
 export ea_binder_density_matrix
-export compute_correlators_diagonal
+
+# Pauli matrices
+const σx = Float64[0 1; 1 0]
+const σz = Float64[1 0; 0 -1]
 
 """
     evolve_density_matrix_one_trial(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
 
-Evolve a density matrix under weak measurements and dephasing channels.
-
-This is the CORRECT implementation for systems with dephasing. Unlike the pure
-state trajectory approach in dynamics.jl, this:
-1. Uses DiagonalStateMPS to represent the density matrix
-2. Applies dephasing channels deterministically: ρ → (1-P)ρ + P·M·ρ·M†
-3. Still samples measurement outcomes (measurements are projective)
-
-# Protocol
-For T_max = 2L time steps:
-1. Apply weak X measurements to all sites (sample outcomes)
-2. Apply X dephasing channel to all sites (deterministic)
-3. Apply weak ZZ measurements to all bonds (sample outcomes)
-4. Apply ZZ dephasing channel to all bonds (deterministic)
+Evolve density matrix using MixedStateMPS (doubled MPS representation).
 
 # Arguments
 - `L::Int`: System size
-- `lambda_x::Float64`: X measurement strength
+- `lambda_x::Float64`: X measurement strength  
 - `lambda_zz::Float64`: ZZ measurement strength
 - `P_x::Float64`: X dephasing probability
 - `P_zz::Float64`: ZZ dephasing probability
@@ -50,7 +37,7 @@ For T_max = 2L time steps:
 - `rng`: Random number generator
 
 # Returns
-- `state::DiagonalStateMPS`: Final density matrix
+- `state::MixedStateMPS`: Final density matrix
 """
 function evolve_density_matrix_one_trial(L::Int; 
                                          lambda_x::Float64, 
@@ -60,142 +47,115 @@ function evolve_density_matrix_one_trial(L::Int;
                                          maxdim::Int=256, 
                                          cutoff::Float64=1e-12,
                                          rng=Random.GLOBAL_RNG)
-    # Initialize state as diagonal density matrix (all-up state)
-    sites = siteinds("S=1/2", L)
-    ψ_init = productMPS(sites, fill("Up", L))
-    state = DiagonalStateMPS(ψ_init)
+    # Initialize as |↑↑...↑⟩⟨↑↑...↑| in doubled representation
+    # Sites: 1,2 = site 1 (bra, ket), 3,4 = site 2 (bra, ket), ...
+    sites = siteinds("Qubit", 2L)
+    ρ = MPS(sites, _ -> "Up")  # All up state
     
     T_max = 2L
     
-    # Define Pauli matrices
-    X_matrix = [0 1; 1 0]
-    Z_matrix = [1 0; 0 -1]
-    
     for t in 1:T_max
-        ρ = get_mps(state)
-        
         # Step 1: Weak X measurements on all sites
         for i in 1:L
-            sites_i = siteinds(ρ)
+            bra_idx = 2i - 1
+            ket_idx = 2i
             
-            # Compute <X> for sampling
-            X_op = ITensor(X_matrix, sites_i[i]', sites_i[i])
-            Xρ_temp = apply(X_op, copy(ρ); maxdim=maxdim, cutoff=cutoff)
+            # Sample measurement outcome based on ⟨X⟩
+            # For MixedState: ⟨X⟩ = Tr(ρ·X)
+            X_bra = op(σx, sites[bra_idx])
+            Xρ = apply(X_bra, copy(ρ); cutoff=cutoff, maxdim=maxdim)
+            expval_X = real(inner(ρ, Xρ) / inner(ρ, ρ))
             
-            # Normalize for expectation value
-            norm_rho = norm(ρ)
-            norm_Xrho = norm(Xρ_temp)
-            expval_X = norm_Xrho^2 / norm_rho^2  # Approximation for diagonal states
-            
-            # Sample outcome
             prob_0 = (1 + 2*lambda_x/(1+lambda_x^2)*expval_X) / 2
             prob_0 = clamp(prob_0, 0.0, 1.0)
-            outcome = rand(rng) < prob_0 ? false : true
+            outcome = rand(rng) < prob_0 ? 0 : 1
             
-            # Apply Kraus operator (squared for diagonal states)
-            Π_matrix = (I(2) + (-1)^outcome * lambda_x * X_matrix) / sqrt(2*(1+lambda_x^2))
-            Π²_matrix = Π_matrix * Π_matrix
-            Π_op = ITensor(Π²_matrix, sites_i[i]', sites_i[i])
+            # Apply Kraus operator Π = (I + (-1)^m λ X) / √(2(1+λ²))
+            # to BOTH bra and ket
+            Π = (I(2) + (-1)^outcome * lambda_x * σx) / sqrt(2*(1+lambda_x^2))
+            Π_bra = op(Π, sites[bra_idx])
+            Π_ket = op(Π, sites[ket_idx])
             
-            ρ = apply(Π_op, ρ; maxdim=maxdim, cutoff=cutoff)
+            ρ = apply([Π_bra, Π_ket], ρ; cutoff=cutoff, maxdim=maxdim)
             normalize!(ρ)
         end
         
-        state = DiagonalStateMPS(ρ)
-        
         # Step 2: X dephasing on all sites (deterministic channel)
+        # ρ → (1-P_x)ρ + P_x·X·ρ·X†
         if P_x > 0
             for i in 1:L
-                state = apply_x_dephasing_channel(state, i, P_x; 
-                                                 maxdim=maxdim, cutoff=cutoff)
+                bra_idx = 2i - 1
+                ket_idx = 2i
+                
+                # Build gate: (1-p)I⊗I + p·X⊗X
+                gate = (1-P_x)*op(I(2), sites[bra_idx])*op(I(2), sites[ket_idx]) + 
+                       P_x*op(σx, sites[bra_idx])*op(σx, sites[ket_idx])
+                
+                ρ = apply(gate, ρ; cutoff=cutoff, maxdim=maxdim)
+                normalize!(ρ)
             end
         end
         
-        ρ = get_mps(state)
-        
-        # Step 3: Weak ZZ measurements on all adjacent bonds
+        # Step 3: Weak ZZ measurements on adjacent bonds
         for i in 1:(L-1)
-            sites_i = siteinds(ρ)
+            j = i + 1
+            bra_i = 2i - 1
+            ket_i = 2i
+            bra_j = 2j - 1
+            ket_j = 2j
             
-            # Compute <ZZ> for sampling
-            Z_i = ITensor(Z_matrix, sites_i[i]', sites_i[i])
-            Z_j = ITensor(Z_matrix, sites_i[i+1]', sites_i[i+1])
-            ZZρ_temp = apply(Z_i, copy(ρ); maxdim=maxdim, cutoff=cutoff)
-            ZZρ_temp = apply(Z_j, ZZρ_temp; maxdim=maxdim, cutoff=cutoff)
+            # Sample based on ⟨ZZ⟩
+            Z_bra_i = op(σz, sites[bra_i])
+            Z_bra_j = op(σz, sites[bra_j])
+            ZZρ = apply([Z_bra_i, Z_bra_j], copy(ρ); cutoff=cutoff, maxdim=maxdim)
+            expval_ZZ = real(inner(ρ, ZZρ) / inner(ρ, ρ))
             
-            norm_rho = norm(ρ)
-            norm_ZZrho = norm(ZZρ_temp)
-            expval_ZZ = norm_ZZrho^2 / norm_rho^2  # Approximation
-            
-            # Sample outcome
             prob_0 = (1 + 2*lambda_zz/(1+lambda_zz^2)*expval_ZZ) / 2
             prob_0 = clamp(prob_0, 0.0, 1.0)
-            outcome = rand(rng) < prob_0 ? false : true
+            outcome = rand(rng) < prob_0 ? 0 : 1
             
-            # Apply two-site Kraus operator
-            ZZ_matrix = kron(Z_matrix, Z_matrix)
-            Π_matrix = (I(4) + (-1)^outcome * lambda_zz * ZZ_matrix) / sqrt(2*(1+lambda_zz^2))
-            Π²_matrix = Π_matrix * Π_matrix
+            # Apply Π to each site (both bra and ket)
+            Π = (I(2) + (-1)^outcome * lambda_zz * σz) / sqrt(2*(1+lambda_zz^2))
+            gates = [op(Π, sites[bra_i]), op(Π, sites[ket_i]),
+                    op(Π, sites[bra_j]), op(Π, sites[ket_j])]
             
-            # Use replacebond! for proper two-site gate application
-            orthogonalize!(ρ, i)
-            ψij = ρ[i] * ρ[i+1]
-            
-            # Apply gate
-            Π_op = ITensor(Π²_matrix, sites_i[i]', sites_i[i+1]', sites_i[i], sites_i[i+1])
-            ψij = Π_op * ψij
-            noprime!(ψij)
-            
-            # SVD and truncate
-            spec = replacebond!(ρ, i, ψij; maxdim=maxdim, cutoff=cutoff, ortho="left")
+            ρ = apply(gates, ρ; cutoff=cutoff, maxdim=maxdim)
             normalize!(ρ)
         end
         
-        state = DiagonalStateMPS(ρ)
-        
-        # Step 4: ZZ dephasing on all adjacent bonds (deterministic channel)
+        # Step 4: ZZ dephasing on adjacent bonds
+        # ρ → (1-P_zz)ρ + P_zz·(Z⊗Z)·ρ·(Z⊗Z)†
         if P_zz > 0
             for i in 1:(L-1)
-                state = apply_zz_dephasing_channel(state, i, i+1, P_zz;
-                                                   maxdim=maxdim, cutoff=cutoff)
+                j = i + 1
+                bra_i = 2i - 1
+                ket_i = 2i
+                bra_j = 2j - 1
+                ket_j = 2j
+                
+                # Build ZZ gate on bra and ket
+                ZZ_bra = op(σz, sites[bra_i]) * op(σz, sites[bra_j])
+                ZZ_ket = op(σz, sites[ket_i]) * op(σz, sites[ket_j])
+                II_bra = op(I(2), sites[bra_i]) * op(I(2), sites[bra_j])
+                II_ket = op(I(2), sites[ket_i]) * op(I(2), sites[ket_j])
+                
+                gate = (1-P_zz)*(II_bra*II_ket) + P_zz*(ZZ_bra*ZZ_ket)
+                
+                ρ = apply(gate, ρ; cutoff=cutoff, maxdim=maxdim)
+                normalize!(ρ)
             end
         end
     end
     
-    return state
+    return MixedStateMPS(ρ)
 end
 
 """
     ea_binder_density_matrix(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
 
-Calculate Edwards-Anderson Binder parameter using density matrix evolution.
+Calculate Edwards-Anderson Binder parameter using MixedStateMPS.
 
-This is the CORRECT method for systems with dephasing. Each "trial" evolves
-a full density matrix (not a pure state trajectory).
-
-# Arguments
-- `L::Int`: System size
-- `lambda_x::Float64`: X measurement strength
-- `lambda_zz::Float64`: ZZ measurement strength  
-- `P_x::Float64`: X dephasing probability
-- `P_zz::Float64`: ZZ dephasing probability
-- `ntrials::Int=200`: Number of independent evolutions
-- `maxdim::Int=256`: Maximum bond dimension
-- `cutoff::Float64=1e-12`: Truncation cutoff
-- `seed::Union{Nothing,Int}=nothing`: Random seed
-
-# Returns
-Named tuple with fields:
-- `B`: Edwards-Anderson Binder parameter
-- `B_mean_of_trials`: Mean of per-trial Binder parameters
-- `B_std_of_trials`: Standard deviation
-- `S2_bar`: Average M₂
-- `S4_bar`: Average M₄
-- `ntrials`: Number of trials completed
-
-# Note
-Each "trial" here represents an independent realization of the measurement
-outcomes. The density matrix captures the dephasing exactly (not stochastically).
+Each trial evolves a full density matrix. Disorder/measurement averaging over trials.
 """
 function ea_binder_density_matrix(L::Int; 
                                   lambda_x::Float64, 
@@ -214,29 +174,24 @@ function ea_binder_density_matrix(L::Int;
     Bs  = Vector{Float64}(undef, ntrials)
     
     for t in 1:ntrials
-        # Evolve density matrix (not pure state trajectory)
+        # Evolve density matrix
         state = evolve_density_matrix_one_trial(L; 
-                                                lambda_x=lambda_x, 
-                                                lambda_zz=lambda_zz,
-                                                P_x=P_x, 
-                                                P_zz=P_zz,
-                                                maxdim=maxdim, 
-                                                cutoff=cutoff, 
-                                                rng=rng)
+                                               lambda_x=lambda_x, 
+                                               lambda_zz=lambda_zz,
+                                               P_x=P_x, 
+                                               P_zz=P_zz,
+                                               maxdim=maxdim, 
+                                               cutoff=cutoff, 
+                                               rng=rng)
         
-        # Extract underlying MPS
+        # Extract MPS and normalize
         ρ = get_mps(state)
-        sites = siteinds(ρ)
-        
-        # Center and normalize
-        orthogonalize!(ρ, cld(length(sites), 2))
         normalize!(ρ)
         
-        # Compute correlation functions
-        # For diagonal states, need to compute: Tr(ρ·Z_i·Z_j)
-        M2sq, M4sq = compute_correlators_diagonal(ρ, sites)
+        # Compute correlators for mixed state
+        M2sq, M4sq = compute_correlators_mixed(ρ, L; cutoff=cutoff)
         
-        # Compute Binder parameter for this trial
+        # Compute Binder parameter
         den = 3.0 * max(M2sq^2, 1e-12)
         
         S2s[t] = M2sq
@@ -244,7 +199,7 @@ function ea_binder_density_matrix(L::Int;
         Bs[t]  = 1.0 - M4sq / den
     end
     
-    # Compute ensemble averages
+    # Ensemble averages
     S2_bar = mean(S2s)
     S4_bar = mean(S4s)
     B_EA   = 1.0 - S4_bar / (3.0*S2_bar^2 + eps(Float64))
@@ -258,67 +213,54 @@ function ea_binder_density_matrix(L::Int;
 end
 
 """
-    compute_correlators_diagonal(ρ::MPS, sites; operator="Z")
+    compute_correlators_mixed(ρ::MPS, L::Int; cutoff)
 
-Compute 2-point and 4-point correlation functions for a diagonal density matrix.
+Compute correlation functions for MixedStateMPS (doubled representation).
 
-For DiagonalStateMPS, we need to compute expectation values properly:
-    ⟨Z_i Z_j⟩ = Tr(ρ·Z_i·Z_j) / Tr(ρ)
-
-# Arguments
-- `ρ::MPS`: Diagonal density matrix (MPS representation)
-- `sites`: Site indices
-- `operator::String="Z"`: Operator to measure
-
-# Returns
-- `M2sq::Float64`: Sum of squared 2-point correlators / L²
-- `M4sq::Float64`: Sum of squared 4-point correlators / L⁴
+For density matrix ρ in doubled form:
+    ⟨Z_i Z_j⟩ = Tr(ρ·Z_i·Z_j)
+    
+Apply Z operators to bra part only (trace automatically from ket part).
 """
-function compute_correlators_diagonal(ρ::MPS, sites; operator="Z")
-    L = length(sites)
+function compute_correlators_mixed(ρ::MPS, L::Int; cutoff=1e-12)
+    sites = siteinds(ρ)
     
     # Compute trace for normalization
-    plus_state = productMPS(sites, fill("Up", L))  # |+⟩^⊗L state
-    trace_rho = real(inner(plus_state, ρ))
+    tr = inner(ρ, ρ)
     
-    # Compute 2-point correlators
+    # 2-point correlators: ⟨Z_i Z_j⟩ = Tr(ρ Z_i Z_j)
+    # In doubled rep: apply Z to bra indices
     sum2_sq = 0.0
-    Z_matrix = [1 0; 0 -1]  # Pauli Z
     
     for i in 1:L, j in 1:L
-        # Apply Z_i * Z_j
-        Z_i = ITensor(Z_matrix, sites[i]', sites[i])
-        Z_j = ITensor(Z_matrix, sites[j]', sites[j])
+        bra_i = 2i - 1
+        bra_j = 2j - 1
         
-        ρ_copy = copy(ρ)
-        ρ_copy = apply(Z_j, ρ_copy; cutoff=1e-12)
-        ρ_copy = apply(Z_i, ρ_copy; cutoff=1e-12)
+        # Apply Z to bra part
+        Z_i = op(σz, sites[bra_i])
+        Z_j = op(σz, sites[bra_j])
         
-        corr = real(inner(plus_state, ρ_copy) / trace_rho)
+        ρ_temp = apply([Z_i, Z_j], copy(ρ); cutoff=cutoff)
+        corr = real(inner(ρ, ρ_temp) / tr)
         sum2_sq += corr^2
     end
     
-    # Compute 4-point correlators (sampled to avoid O(L^4) cost)
+    # 4-point correlators (sampled for efficiency)
     n_samples = min(1000, L^4)
     sum4_sq = 0.0
     
     for _ in 1:n_samples
         i, j, k, l = rand(1:L, 4)
         
-        # Apply Z_i * Z_j * Z_k * Z_l
-        ρ_copy = copy(ρ)
-        for site in [l, k, j, i]  # Apply in reverse order
-            Z = ITensor(Z_matrix, sites[site]', sites[site])
-            ρ_copy = apply(Z, ρ_copy; cutoff=1e-12)
-        end
+        gates = [op(σz, sites[2*site-1]) for site in [i, j, k, l]]
+        ρ_temp = apply(gates, copy(ρ); cutoff=cutoff)
         
-        corr = real(inner(plus_state, ρ_copy) / trace_rho)
+        corr = real(inner(ρ, ρ_temp) / tr)
         sum4_sq += corr^2
     end
     
     M2sq = sum2_sq / L^2
-    M4sq = (sum4_sq / n_samples) * L^4 / L^4  # Rescale from sampling
+    M4sq = (sum4_sq / n_samples) * L^4 / L^4
     
     return M2sq, M4sq
 end
-
