@@ -22,6 +22,22 @@ const σx = Float64[0 1; 1 0]
 const σz = Float64[1 0; 0 -1]
 
 """
+    M_bra(sites, M, pos; refs=0)
+
+Create "doubled" MPS for operator M at position pos, identity elsewhere.
+From src_1/MPS/tools.jl pattern.
+"""
+function M_bra(sites::Vector{<:Index}, M::AbstractMatrix, pos::Int; refs=0)
+    M_width = Int(log2(size(M)[1]))
+    L = length(sites)÷2 - refs
+    
+    bra = bell(sites)
+    # Apply M to ket indices (even: 2,4,6,...)
+    bra = apply(op(M, [sites[mod1(2*(pos+i),2L)] for i in 0:M_width-1]...), bra)
+    return bra
+end
+
+"""
     evolve_density_matrix_one_trial(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
 
 Evolve density matrix using MixedStateMPS (doubled MPS representation).
@@ -60,11 +76,11 @@ function evolve_density_matrix_one_trial(L::Int;
             bra_idx = 2i - 1
             ket_idx = 2i
             
-            # Sample measurement outcome based on ⟨X⟩
-            # For MixedState: ⟨X⟩ = Tr(ρ·X)
-            X_bra = op(σx, sites[bra_idx])
-            Xρ = apply(X_bra, copy(ρ); cutoff=cutoff, maxdim=maxdim)
-            expval_X = real(inner(ρ, Xρ) / inner(ρ, ρ))
+            # Sample measurement outcome based on ⟨X⟩ = Tr(ρ·X) / Tr(ρ)
+            # Use M_bra / doubledtrace pattern from src_1
+            X_bra_state = M_bra(sites, σx, i)
+            tr = doubledtrace(ρ)
+            expval_X = real(inner(X_bra_state, ρ) / tr)
             
             prob_0 = (1 + 2*lambda_x/(1+lambda_x^2)*expval_X) / 2
             prob_0 = clamp(prob_0, 0.0, 1.0)
@@ -77,22 +93,25 @@ function evolve_density_matrix_one_trial(L::Int;
             Π_ket = op(Π, sites[ket_idx])
             
             ρ = apply([Π_bra, Π_ket], ρ; cutoff=cutoff, maxdim=maxdim)
-            normalize!(ρ)
+            # Renormalize by trace after measurement
+            ρ = ρ / doubledtrace(ρ)
         end
         
         # Step 2: X dephasing on all sites (deterministic channel)
         # ρ → (1-P_x)ρ + P_x·X·ρ·X†
+        # CPTP channel preserves trace - do NOT renormalize
         if P_x > 0
             for i in 1:L
                 bra_idx = 2i - 1
                 ket_idx = 2i
                 
-                # Build gate: (1-p)I⊗I + p·X⊗X
-                gate = (1-P_x)*op(I(2), sites[bra_idx])*op(I(2), sites[ket_idx]) + 
-                       P_x*op(σx, sites[bra_idx])*op(σx, sites[ket_idx])
+                # Decoherence channel: (1-p)I⊗I + p·X⊗X
+                I_gate = op(I(2), sites[bra_idx]) * op(I(2), sites[ket_idx])
+                X_gate = op(σx, sites[bra_idx]) * op(σx, sites[ket_idx])
+                gate = (1-P_x)*I_gate + P_x*X_gate
                 
                 ρ = apply(gate, ρ; cutoff=cutoff, maxdim=maxdim)
-                normalize!(ρ)
+                # No renormalization - CPTP preserves trace
             end
         end
         
@@ -104,11 +123,12 @@ function evolve_density_matrix_one_trial(L::Int;
             bra_j = 2j - 1
             ket_j = 2j
             
-            # Sample based on ⟨ZZ⟩
-            Z_bra_i = op(σz, sites[bra_i])
-            Z_bra_j = op(σz, sites[bra_j])
-            ZZρ = apply([Z_bra_i, Z_bra_j], copy(ρ); cutoff=cutoff, maxdim=maxdim)
-            expval_ZZ = real(inner(ρ, ZZρ) / inner(ρ, ρ))
+            # Sample based on ⟨ZZ⟩ = Tr(ρ·Z_i·Z_j) / Tr(ρ)
+            # For 2-qubit operator, need to construct it properly
+            ZZ = kron(σz, σz)
+            ZZ_bra_state = M_bra(sites, ZZ, i)
+            tr = doubledtrace(ρ)
+            expval_ZZ = real(inner(ZZ_bra_state, ρ) / tr)
             
             prob_0 = (1 + 2*lambda_zz/(1+lambda_zz^2)*expval_ZZ) / 2
             prob_0 = clamp(prob_0, 0.0, 1.0)
@@ -120,7 +140,8 @@ function evolve_density_matrix_one_trial(L::Int;
                     op(Π, sites[bra_j]), op(Π, sites[ket_j])]
             
             ρ = apply(gates, ρ; cutoff=cutoff, maxdim=maxdim)
-            normalize!(ρ)
+            # Renormalize by trace after measurement
+            ρ = ρ / doubledtrace(ρ)
         end
         
         # Step 4: ZZ dephasing on adjacent bonds
@@ -142,7 +163,7 @@ function evolve_density_matrix_one_trial(L::Int;
                 gate = (1-P_zz)*(II_bra*II_ket) + P_zz*(ZZ_bra*ZZ_ket)
                 
                 ρ = apply(gate, ρ; cutoff=cutoff, maxdim=maxdim)
-                normalize!(ρ)
+                # No renormalization - CPTP preserves trace
             end
         end
     end
@@ -184,9 +205,9 @@ function ea_binder_density_matrix(L::Int;
                                                cutoff=cutoff, 
                                                rng=rng)
         
-        # Extract MPS and normalize
+        # Extract MPS and normalize by trace (not HS norm)
         ρ = get_mps(state)
-        normalize!(ρ)
+        ρ = ρ / doubledtrace(ρ)
         
         # Compute correlators for mixed state
         M2sq, M4sq = compute_correlators_mixed(ρ, L; cutoff=cutoff)
@@ -213,49 +234,93 @@ function ea_binder_density_matrix(L::Int;
 end
 
 """
-    compute_correlators_mixed(ρ::MPS, L::Int; cutoff)
+    bell(sites)
 
-Compute correlation functions for MixedStateMPS (doubled representation).
-
-For density matrix ρ in doubled form:
-    ⟨Z_i Z_j⟩ = Tr(ρ·Z_i·Z_j)
-    
-Apply Z operators to bra part only (trace automatically from ket part).
+Create bell state for doubled MPS trace computation.
+Uses src_1/MPS pattern: |00⟩+|11⟩ for each (bra,ket) pair.
 """
+function id_mps(s1::Index, s2::Index)
+    return MPS([1.0; 0.0; 0.0; 1.0], [s1, s2])
+end
+
+function bell(sites::Vector{<:Index})
+    N = length(sites)
+    @assert iseven(N) "Sites must have even length for doubled MPS"
+    
+    tensors = ITensor[]
+    for i in 1:2:N
+        a, b = id_mps(sites[i], sites[i+1])
+        push!(tensors, a, b)
+    end
+    return MPS(tensors)
+end
+
+"""
+    doubledtrace(ρ)
+
+Compute trace of density matrix in doubled MPS representation.
+"""
+function doubledtrace(ρ::MPS)
+    return real(inner(bell(siteinds(ρ)), ρ))
+end
+
+"""
+    compute_correlators_mixed(ρ, L; cutoff)
+
+Compute correlators for EA Binder parameter.
+CORRECTED version based on bug guide.
+"""
+function corr_ZZ(ρ::MPS, i::Int, j::Int)
+    sites = siteinds(ρ)
+    tr = doubledtrace(ρ)
+    
+    if i == j
+        # ⟨Z_i Z_i⟩ = ⟨Z²⟩ = ⟨I⟩ = 1
+        return 1.0
+    elseif abs(i - j) == 1
+        # Nearest neighbors: can use M_bra with kron(σz, σz)
+        pos = min(i, j)
+        M = kron(σz, σz)
+        bra = M_bra(sites, M, pos)
+        return real(inner(bra, ρ) / tr)
+    else
+        # Non-nearest neighbors: apply two single-site Z operators
+        # ⟨Z_i Z_j⟩ = Tr(ρ · Z_i · Z_j) = inner(bell, Z_i · Z_j · ρ)
+        # Apply Z to ket indices (even)
+        bra = bell(sites)
+        Z_i = op(σz, sites[2*i])
+        Z_j = op(σz, sites[2*j])
+        bra = apply([Z_i, Z_j], bra; cutoff=1e-14)
+        return real(inner(bra, ρ) / tr)
+    end
+end
+
 function compute_correlators_mixed(ρ::MPS, L::Int; cutoff=1e-12)
     sites = siteinds(ρ)
+    tr = doubledtrace(ρ)
     
-    # Compute trace for normalization
-    tr = inner(ρ, ρ)
-    
-    # 2-point correlators: ⟨Z_i Z_j⟩ = Tr(ρ Z_i Z_j)
-    # In doubled rep: apply Z to bra indices
+    # 2-point correlators: compute all C_ij = ⟨Z_i Z_j⟩
     sum2_sq = 0.0
-    
     for i in 1:L, j in 1:L
-        bra_i = 2i - 1
-        bra_j = 2j - 1
-        
-        # Apply Z to bra part
-        Z_i = op(σz, sites[bra_i])
-        Z_j = op(σz, sites[bra_j])
-        
-        ρ_temp = apply([Z_i, Z_j], copy(ρ); cutoff=cutoff)
-        corr = real(inner(ρ, ρ_temp) / tr)
-        sum2_sq += corr^2
+        C_ij = corr_ZZ(ρ, i, j)
+        sum2_sq += C_ij^2
     end
     
-    # 4-point correlators (sampled for efficiency)
+    # 4-point correlators: ⟨Z_i Z_j Z_k Z_l⟩
+    # Always apply all four Z operators sequentially (duplicates cancel: Z²=I)
     n_samples = min(1000, L^4)
     sum4_sq = 0.0
     
     for _ in 1:n_samples
-        i, j, k, l = rand(1:L, 4)
+        indices = rand(1:L, 4)
         
-        gates = [op(σz, sites[2*site-1]) for site in [i, j, k, l]]
-        ρ_temp = apply(gates, copy(ρ); cutoff=cutoff)
-        
-        corr = real(inner(ρ, ρ_temp) / tr)
+        # Apply four Z operators sequentially to ket legs
+        bra = bell(sites)
+        for idx in indices
+            Z_gate = op(σz, sites[2*idx])
+            bra = apply(Z_gate, bra; cutoff=1e-14)
+        end
+        corr = real(inner(bra, ρ) / tr)
         sum4_sq += corr^2
     end
     
