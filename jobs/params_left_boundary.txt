@@ -1,5 +1,3 @@
-# Left boundary scan: lambda_x=0, lambda_zz=0.3, scan P_zz
-# Format: L lambda_x lambda_zz P_x P_zz ntrials seed sample out_prefix
 8 0.0 0.3 0.0 0.0 400 7001 1 left_boundary_L8_lzz0.30_Pzz0.00_s1
 8 0.0 0.3 0.0 0.0 400 7002 2 left_boundary_L8_lzz0.30_Pzz0.00_s2
 8 0.0 0.3 0.0 0.0 400 7003 3 left_boundary_L8_lzz0.30_Pzz0.00_s3
