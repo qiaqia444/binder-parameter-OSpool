@@ -99,23 +99,30 @@ function evolve_density_matrix_one_trial(L::Int;
         
         # Step 2: X dephasing on all sites (deterministic channel)
         # ρ → (1-P_x)ρ + P_x·X·ρ·X†
+        # In vectorized form: |ρ⟩ → [(1-p)I + p(X⊗X*)] |ρ⟩
         # CPTP channel preserves trace - do NOT renormalize
         if P_x > 0
             for i in 1:L
                 bra_idx = 2i - 1
                 ket_idx = 2i
                 
-                # Decoherence channel: (1-p)I⊗I + p·X⊗X
-                I_gate = op(I(2), sites[bra_idx]) * op(I(2), sites[ket_idx])
-                X_gate = op(σx, sites[bra_idx]) * op(σx, sites[ket_idx])
-                gate = (1-P_x)*I_gate + P_x*X_gate
+                # Apply CPTP map as linear combination of MPOs
+                # Identity superoperator: I⊗I acting on (bra,ket)
+                ρ_copy = copy(ρ)
                 
-                ρ = apply(gate, ρ; cutoff=cutoff, maxdim=maxdim)
+                # Conjugation superoperator: X⊗X* = X on ket, X on bra
+                X_bra = op(σx, sites[bra_idx])
+                X_ket = op(σx, sites[ket_idx])
+                ρ_dephased = apply([X_bra, X_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+                
+                # Linear combination: (1-p)|ρ⟩ + p(X⊗X)|ρ⟩
+                ρ = (1-P_x) * ρ_copy + P_x * ρ_dephased
                 # No renormalization - CPTP preserves trace
             end
         end
         
         # Step 3: Weak ZZ measurements on adjacent bonds
+        # Use proper 2-site Kraus operator: K_m = (I₄ + (-1)^m λ_zz (Z⊗Z)) / √(2(1+λ_zz²))
         for i in 1:(L-1)
             j = i + 1
             bra_i = 2i - 1
@@ -123,8 +130,7 @@ function evolve_density_matrix_one_trial(L::Int;
             bra_j = 2j - 1
             ket_j = 2j
             
-            # Sample based on ⟨ZZ⟩ = Tr(ρ·Z_i·Z_j) / Tr(ρ)
-            # For 2-qubit operator, need to construct it properly
+            # Sample based on ⟨Z_i Z_j⟩ = Tr(ρ·Z_i·Z_j) / Tr(ρ)
             ZZ = kron(σz, σz)
             ZZ_bra_state = M_bra(sites, ZZ, i)
             tr = doubledtrace(ρ)
@@ -134,18 +140,23 @@ function evolve_density_matrix_one_trial(L::Int;
             prob_0 = clamp(prob_0, 0.0, 1.0)
             outcome = rand(rng) < prob_0 ? 0 : 1
             
-            # Apply Π to each site (both bra and ket)
-            Π = (I(2) + (-1)^outcome * lambda_zz * σz) / sqrt(2*(1+lambda_zz^2))
-            gates = [op(Π, sites[bra_i]), op(Π, sites[ket_i]),
-                    op(Π, sites[bra_j]), op(Π, sites[ket_j])]
+            # Build 2-site Kraus operator: K_m = (I₄ + (-1)^m λ_zz (Z⊗Z)) / √(2(1+λ_zz²))
+            I4 = Matrix{Float64}(I, 4, 4)
+            ZZ_2site = kron(σz, σz)
+            K_m = (I4 + (-1)^outcome * lambda_zz * ZZ_2site) / sqrt(2*(1+lambda_zz^2))
             
-            ρ = apply(gates, ρ; cutoff=cutoff, maxdim=maxdim)
+            # Apply K_m to ket pair (i,j) and K_m to bra pair (since K_m is real)
+            K_ket = op(K_m, sites[ket_i], sites[ket_j])
+            K_bra = op(K_m, sites[bra_i], sites[bra_j])
+            
+            ρ = apply([K_bra, K_ket], ρ; cutoff=cutoff, maxdim=maxdim)
             # Renormalize by trace after measurement
             ρ = ρ / doubledtrace(ρ)
         end
         
         # Step 4: ZZ dephasing on adjacent bonds
         # ρ → (1-P_zz)ρ + P_zz·(Z⊗Z)·ρ·(Z⊗Z)†
+        # In vectorized form: |ρ⟩ → [(1-p)I + p(ZZ⊗ZZ*)] |ρ⟩
         if P_zz > 0
             for i in 1:(L-1)
                 j = i + 1
@@ -154,21 +165,22 @@ function evolve_density_matrix_one_trial(L::Int;
                 bra_j = 2j - 1
                 ket_j = 2j
                 
-                # Build ZZ gate on bra and ket
+                # Apply CPTP map as linear combination of MPOs
+                ρ_copy = copy(ρ)
+                
+                # Conjugation superoperator: (ZZ)⊗(ZZ)* = ZZ on ket, ZZ on bra
                 ZZ_bra = op(σz, sites[bra_i]) * op(σz, sites[bra_j])
                 ZZ_ket = op(σz, sites[ket_i]) * op(σz, sites[ket_j])
-                II_bra = op(I(2), sites[bra_i]) * op(I(2), sites[bra_j])
-                II_ket = op(I(2), sites[ket_i]) * op(I(2), sites[ket_j])
+                ρ_dephased = apply([ZZ_bra, ZZ_ket], ρ; cutoff=cutoff, maxdim=maxdim)
                 
-                gate = (1-P_zz)*(II_bra*II_ket) + P_zz*(ZZ_bra*ZZ_ket)
-                
-                ρ = apply(gate, ρ; cutoff=cutoff, maxdim=maxdim)
+                # Linear combination: (1-p)|ρ⟩ + p(ZZ⊗ZZ)|ρ⟩
+                ρ = (1-P_zz) * ρ_copy + P_zz * ρ_dephased
                 # No renormalization - CPTP preserves trace
             end
         end
     end
     
-    return MixedStateMPS(ρ)
+    return MixedStateMPS(ρ), sites
 end
 
 """
@@ -196,7 +208,7 @@ function ea_binder_density_matrix(L::Int;
     
     for t in 1:ntrials
         # Evolve density matrix
-        state = evolve_density_matrix_one_trial(L; 
+        state, _ = evolve_density_matrix_one_trial(L; 
                                                lambda_x=lambda_x, 
                                                lambda_zz=lambda_zz,
                                                P_x=P_x, 
