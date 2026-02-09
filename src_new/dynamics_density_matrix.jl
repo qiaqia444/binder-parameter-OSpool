@@ -68,7 +68,7 @@ function evolve_density_matrix_one_trial(L::Int;
     sites = siteinds("Qubit", 2L)
     ρ = MPS(sites, _ -> "Up")  # All up state
     
-    T_max = 2L
+    T_max = 100 * L  # Increased for weak measurements to reach steady state
     
     for t in 1:T_max
         # Step 1: Weak X measurements on all sites

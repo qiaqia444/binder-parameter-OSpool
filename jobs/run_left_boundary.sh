@@ -50,6 +50,7 @@ julia --project=. run_left_boundary_scan.jl \
     --P_zz_value $P_zz \
     --ntrials $ntrials \
     --seed $seed \
+    --maxdim 512 \
     --output_dir output \
     --output_file ${out_prefix}.json
 
