@@ -19,6 +19,7 @@ export ea_binder_density_matrix
 
 # Pauli matrices
 const σx = Float64[0 1; 1 0]
+const σy = ComplexF64[0 -im; im 0]
 const σz = Float64[1 0; 0 -1]
 
 """
@@ -68,90 +69,97 @@ function evolve_density_matrix_one_trial(L::Int;
     sites = siteinds("Qubit", 2L)
     ρ = MPS(sites, _ -> "Up")  # All up state
     
-    T_max = 100 * L  # Increased for weak measurements to reach steady state
+    T_max = 50 * L  # Time evolution
     
     for t in 1:T_max
         # Step 1: Weak X measurements on all sites
-        for i in 1:L
-            bra_idx = 2i - 1
-            ket_idx = 2i
-            
-            # Sample measurement outcome based on ⟨X⟩ = Tr(ρ·X) / Tr(ρ)
-            # Use M_bra / doubledtrace pattern from src_1
-            X_bra_state = M_bra(sites, σx, i)
-            tr = doubledtrace(ρ)
-            expval_X = real(inner(X_bra_state, ρ) / tr)
-            
-            prob_0 = (1 + 2*lambda_x/(1+lambda_x^2)*expval_X) / 2
-            prob_0 = clamp(prob_0, 0.0, 1.0)
-            outcome = rand(rng) < prob_0 ? 0 : 1
-            
-            # Apply Kraus operator Π = (I + (-1)^m λ X) / √(2(1+λ²))
-            # to BOTH bra and ket
-            Π = (I(2) + (-1)^outcome * lambda_x * σx) / sqrt(2*(1+lambda_x^2))
-            Π_bra = op(Π, sites[bra_idx])
-            Π_ket = op(Π, sites[ket_idx])
-            
-            ρ = apply([Π_bra, Π_ket], ρ; cutoff=cutoff, maxdim=maxdim)
-            # Renormalize by trace after measurement
-            ρ = ρ / doubledtrace(ρ)
+        if lambda_x > 0
+            for i in 1:L
+                bra_idx = 2i - 1
+                ket_idx = 2i
+                
+                # Sample measurement outcome based on ⟨X⟩ = Tr(ρ·X) / Tr(ρ)
+                # Use M_bra / doubledtrace pattern from src_1
+                X_bra_state = M_bra(sites, σx, i)
+                tr = doubledtrace(ρ)
+                expval_X = real(inner(X_bra_state, ρ) / tr)
+                
+                prob_0 = (1 + 2*lambda_x/(1+lambda_x^2)*expval_X) / 2
+                prob_0 = clamp(prob_0, 0.0, 1.0)
+                outcome = rand(rng) < prob_0 ? 0 : 1
+                
+                # Apply Kraus operator Π = (I + (-1)^m λ X) / √(2(1+λ²))
+                # to BOTH bra and ket
+                Π = (I(2) + (-1)^outcome * lambda_x * σx) / sqrt(2*(1+lambda_x^2))
+                Π_bra = op(Π, sites[bra_idx])
+                Π_ket = op(Π, sites[ket_idx])
+                
+                ρ = apply([Π_bra, Π_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+                # Renormalize by trace after measurement
+                ρ = ρ / doubledtrace(ρ)
+            end
         end
         
-        # Step 2: X dephasing on all sites (deterministic channel)
-        # ρ → (1-P_x)ρ + P_x·X·ρ·X†
+        # Step 2: X dephasing on all sites
+        # ρ → (1-P_x)ρ + P_x·X·ρ·X
         # In vectorized form: |ρ⟩ → [(1-p)I + p(X⊗X*)] |ρ⟩
-        # CPTP channel preserves trace - do NOT renormalize
         if P_x > 0
             for i in 1:L
                 bra_idx = 2i - 1
                 ket_idx = 2i
                 
-                # Apply CPTP map as linear combination of MPOs
-                # Identity superoperator: I⊗I acting on (bra,ket)
+                # Apply CPTP map as linear combination
                 ρ_copy = copy(ρ)
                 
-                # Conjugation superoperator: X⊗X* = X on ket, X on bra
+                # Apply X·ρ·X (conjugation superoperator: X⊗X*)
                 X_bra = op(σx, sites[bra_idx])
                 X_ket = op(σx, sites[ket_idx])
-                ρ_dephased = apply([X_bra, X_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+                ρ_X = apply([X_bra, X_ket], ρ_copy; cutoff=cutoff, maxdim=maxdim)
                 
-                # Linear combination: (1-p)|ρ⟩ + p(X⊗X)|ρ⟩
-                ρ = (1-P_x) * ρ_copy + P_x * ρ_dephased
+                # Linear combination: (1-p)ρ + p·X·ρ·X
+                ρ = (1 - P_x) * ρ_copy + P_x * ρ_X
                 # No renormalization - CPTP preserves trace
             end
         end
         
+        # END LOOP HERE on final timestep - return state after X noise (most thermalized)
+        if t == T_max
+            break
+        end
+        
         # Step 3: Weak ZZ measurements on adjacent bonds
         # Use proper 2-site Kraus operator: K_m = (I₄ + (-1)^m λ_zz (Z⊗Z)) / √(2(1+λ_zz²))
-        for i in 1:(L-1)
-            j = i + 1
-            bra_i = 2i - 1
-            ket_i = 2i
-            bra_j = 2j - 1
-            ket_j = 2j
-            
-            # Sample based on ⟨Z_i Z_j⟩ = Tr(ρ·Z_i·Z_j) / Tr(ρ)
-            ZZ = kron(σz, σz)
-            ZZ_bra_state = M_bra(sites, ZZ, i)
-            tr = doubledtrace(ρ)
-            expval_ZZ = real(inner(ZZ_bra_state, ρ) / tr)
-            
-            prob_0 = (1 + 2*lambda_zz/(1+lambda_zz^2)*expval_ZZ) / 2
-            prob_0 = clamp(prob_0, 0.0, 1.0)
-            outcome = rand(rng) < prob_0 ? 0 : 1
-            
-            # Build 2-site Kraus operator: K_m = (I₄ + (-1)^m λ_zz (Z⊗Z)) / √(2(1+λ_zz²))
-            I4 = Matrix{Float64}(I, 4, 4)
-            ZZ_2site = kron(σz, σz)
-            K_m = (I4 + (-1)^outcome * lambda_zz * ZZ_2site) / sqrt(2*(1+lambda_zz^2))
-            
-            # Apply K_m to ket pair (i,j) and K_m to bra pair (since K_m is real)
-            K_ket = op(K_m, sites[ket_i], sites[ket_j])
-            K_bra = op(K_m, sites[bra_i], sites[bra_j])
-            
-            ρ = apply([K_bra, K_ket], ρ; cutoff=cutoff, maxdim=maxdim)
-            # Renormalize by trace after measurement
-            ρ = ρ / doubledtrace(ρ)
+        if lambda_zz > 0
+            for i in 1:(L-1)
+                j = i + 1
+                bra_i = 2i - 1
+                ket_i = 2i
+                bra_j = 2j - 1
+                ket_j = 2j
+                
+                # Sample based on ⟨Z_i Z_j⟩ = Tr(ρ·Z_i·Z_j) / Tr(ρ)
+                ZZ = kron(σz, σz)
+                ZZ_bra_state = M_bra(sites, ZZ, i)
+                tr = doubledtrace(ρ)
+                expval_ZZ = real(inner(ZZ_bra_state, ρ) / tr)
+                
+                prob_0 = (1 + 2*lambda_zz/(1+lambda_zz^2)*expval_ZZ) / 2
+                prob_0 = clamp(prob_0, 0.0, 1.0)
+                outcome = rand(rng) < prob_0 ? 0 : 1
+                
+                # Build 2-site Kraus operator: K_m = (I₄ + (-1)^m λ_zz (Z⊗Z)) / √(2(1+λ_zz²))
+                I4 = Matrix{Float64}(I, 4, 4)
+                ZZ_2site = kron(σz, σz)
+                K_m = (I4 + (-1)^outcome * lambda_zz * ZZ_2site) / sqrt(2*(1+lambda_zz^2))
+                
+                # Apply K_m to ket pair (i,j) and K_m to bra pair (since K_m is real)
+                K_ket = op(K_m, sites[ket_i], sites[ket_j])
+                K_bra = op(K_m, sites[bra_i], sites[bra_j])
+                
+                ρ = apply([K_bra, K_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+                # Renormalize by trace after measurement
+                ρ = ρ / doubledtrace(ρ)
+            end
         end
         
         # Step 4: ZZ dephasing on adjacent bonds
@@ -180,6 +188,7 @@ function evolve_density_matrix_one_trial(L::Int;
         end
     end
     
+    # At this point, ρ is the state after X noise at the final timestep
     return MixedStateMPS(ρ), sites
 end
 
