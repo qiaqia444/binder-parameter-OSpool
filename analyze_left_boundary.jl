@@ -15,7 +15,7 @@ using Plots
 using LaTeXStrings
 
 function load_results(results_dir)
-    """Load all JSON files from the results directory."""
+    """Load all JSON files from the results directory - only lx0.00_lzz0.30_P*.json files."""
     all_data = []
     
     for L in [8, 10, 12, 14, 16]
@@ -24,7 +24,9 @@ function load_results(results_dir)
             continue
         end
         
-        json_files = filter(f -> endswith(f, ".json"), readdir(L_dir, join=true))
+        # Only load files matching the pattern: left_boundary_L*_lx0.00_lzz0.30_P*.json
+        json_files = filter(f -> contains(f, "lx0.00_lzz0.30_P") && endswith(f, ".json"), 
+                           readdir(L_dir, join=true))
         
         for file in json_files
             try
@@ -66,46 +68,40 @@ function compute_statistics(df)
 end
 
 function plot_binder_vs_px(stats)
-    """Create plots of Binder parameter vs P_x for different system sizes."""
+    """Create plot of Binder parameter vs P for λ_x=0, λ_zz=0.3."""
     
-    param_sets = unique(select(stats, [:lambda_x, :lambda_zz]))
+    # Should only have one parameter set now (lambda_x=0, lambda_zz=0.3)
+    p1 = plot(xlabel=L"P_x = P_{zz}" * " (dephasing probability)", ylabel="Binder Parameter", 
+              title=L"\lambda_x = 0.0, \lambda_{zz} = 0.3",
+              legend=:topright, grid=true, size=(800, 600), dpi=300)
     
-    for param in eachrow(param_sets)
-        param_data = filter(row -> row.lambda_x == param.lambda_x && row.lambda_zz == param.lambda_zz, stats)
+    colors = [:blue, :red, :green, :purple, :orange]
+    markers = [:circle, :square, :diamond, :utriangle, :dtriangle]
+    
+    for (idx, L) in enumerate(sort(unique(stats.L)))
+        L_data = filter(row -> row.L == L, stats)
         
-        p1 = plot(xlabel=L"P_x = P_{zz}" * " (dephasing probability)", ylabel="Binder Parameter", 
-                  title=L"\lambda_x=" * "$(param.lambda_x)" * L", \lambda_{zz}=" * "$(param.lambda_zz)",
-                  legend=:topright, grid=true, size=(800, 600), dpi=300)
+        plot!(p1, L_data.P_x, L_data.B_mean,
+              yerr=L_data.B_sem,
+              label="L = $L",
+              color=colors[idx],
+              marker=markers[idx],
+              markersize=6,
+              linewidth=2)
         
-        colors = [:blue, :red, :green, :purple, :orange]
-        markers = [:circle, :square, :diamond, :utriangle, :dtriangle]
-        
-        for (idx, L) in enumerate(sort(unique(param_data.L)))
-            L_data = filter(row -> row.L == L, param_data)
-            
-            plot!(p1, L_data.P_x, L_data.B_mean,
-                  yerr=L_data.B_sem,
-                  label="L = $L",
-                  color=colors[idx],
-                  marker=markers[idx],
-                  markersize=6,
-                  linewidth=2)
-            
-            B_mixed = 2.0 / (3.0 * L)
-            hline!(p1, [B_mixed], linestyle=:dot, color=colors[idx], 
-                   label=nothing, linewidth=1, alpha=0.3)
-        end
-        
-        hline!(p1, [2/3], linestyle=:dash, color=:black, label="B = 2/3 (pure)", linewidth=2, alpha=0.7)
-        
-        fname_base = "left_boundary_lx$(param.lambda_x)_lzz$(param.lambda_zz)"
-        savefig(p1, "$(fname_base)_binder_vs_px.pdf")
-        savefig(p1, "$(fname_base)_binder_vs_px.png")
+        B_mixed = 2.0 / (3.0 * L)
+        hline!(p1, [B_mixed], linestyle=:dot, color=colors[idx], 
+               label=nothing, linewidth=1, alpha=0.3)
     end
+    
+    hline!(p1, [2/3], linestyle=:dash, color=:black, label="B = 2/3 (pure)", linewidth=2, alpha=0.7)
+    
+    savefig(p1, "left_boundary_lx0.0_lzz0.3_binder_vs_p.pdf")
+    savefig(p1, "left_boundary_lx0.0_lzz0.3_binder_vs_p.png")
 end
 
 function main()
-    results_dir = "left_boundary_results_20260208_2312"
+    results_dir = "left_boundary_results_20260223_0001"
     
     if !isdir(results_dir)
         return

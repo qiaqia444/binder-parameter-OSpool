@@ -69,7 +69,10 @@ function evolve_density_matrix_one_trial(L::Int;
     sites = siteinds("Qubit", 2L)
     ρ = MPS(sites, _ -> "Up")  # All up state
     
-    T_max = 50 * L  # Time evolution
+    T_max = 200 * L  # Time evolution (increased to ensure saturation for larger L)
+    
+    # Save state after X noise on final timestep (for Binder calculation)
+    ρ_after_X_noise = nothing
     
     for t in 1:T_max
         # Step 1: Weak X measurements on all sites
@@ -122,9 +125,9 @@ function evolve_density_matrix_one_trial(L::Int;
             end
         end
         
-        # END LOOP HERE on final timestep - return state after X noise (most thermalized)
+        # Save state after X noise on final timestep (this is the strobe point)
         if t == T_max
-            break
+            ρ_after_X_noise = deepcopy(ρ)
         end
         
         # Step 3: Weak ZZ measurements on adjacent bonds
@@ -188,8 +191,9 @@ function evolve_density_matrix_one_trial(L::Int;
         end
     end
     
-    # At this point, ρ is the state after X noise at the final timestep
-    return MixedStateMPS(ρ), sites
+    # Return state after X noise on final timestep (most thermalized strobe point)
+    ρ_return = isnothing(ρ_after_X_noise) ? ρ : ρ_after_X_noise
+    return MixedStateMPS(ρ_return), sites
 end
 
 """

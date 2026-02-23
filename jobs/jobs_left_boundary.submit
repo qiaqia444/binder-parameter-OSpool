@@ -17,9 +17,10 @@ output                = logs/left_boundary_L$(L)_Px$(P_x)_s$(sample).out
 error                 = logs/left_boundary_L$(L)_Px$(P_x)_s$(sample).err
 log                   = logs/left_boundary_condor.log
 
-+JobDurationCategory = "Medium"
++JobDurationCategory = "Long"
 
 # Resources (density matrices need more memory than pure states)
+# Increased time needed for T_max=200L (4x longer than previous T_max=50L)
 request_cpus          = 4
 request_memory        = 12 GB
 request_disk          = 8 GB
