@@ -31,6 +31,14 @@ mkdir -p output
 echo "Julia version:"
 julia --version
 
+# Set threading environment variables to use all 4 CPUs
+export JULIA_NUM_THREADS=4
+export OPENBLAS_NUM_THREADS=4
+export MKL_NUM_THREADS=4
+export BLAS_NUM_THREADS=4
+
+echo "Threading enabled: JULIA_NUM_THREADS=$JULIA_NUM_THREADS"
+
 # Install packages
 echo "Setting up Julia environment..."
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'

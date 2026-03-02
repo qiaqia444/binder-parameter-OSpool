@@ -20,7 +20,7 @@ log                   = logs/left_boundary_condor.log
 +JobDurationCategory = "Long"
 
 # Resources (density matrices need more memory than pure states)
-# Increased time needed for T_max=200L (4x longer than previous T_max=50L)
+# T_max = 50L with multi-threading (4 CPUs)
 request_cpus          = 4
 request_memory        = 12 GB
 request_disk          = 8 GB

@@ -13,6 +13,7 @@ Based on src_1/MPS implementation patterns.
 using Random, Statistics
 using ITensors, ITensorMPS
 using LinearAlgebra
+using Base.Threads
 
 # Import types for MixedStateMPS
 include("types.jl")
@@ -77,7 +78,7 @@ function evolve_density_matrix_one_trial(L::Int;
     sites = siteinds("Qubit", 2L)
     ρ = MPS(sites, _ -> "Up")  # All up state
     
-    T_max = 200 * L  # Time evolution (increased to ensure saturation for larger L)
+    T_max = 50 * L  # Time evolution
     
     # Save state after X noise on final timestep (for Binder calculation)
     ρ_after_X_noise = nothing
@@ -426,6 +427,7 @@ ITensors.op(::OpName"Z", ::SiteType"DM", s::Index) = make_vectorized_Z_op(s)
 Compute M₂ and M₄ using vectorized density matrix correlator function.
 
 Uses correlator from correlators_vectorized.jl which computes <1|O|ρ> for vectorized |ρ⟩.
+Parallelized using multi-threading for faster computation.
 """
 function compute_correlators_vectorized(ρ_vec::MPS, L::Int)
     # Generate all pairs and quads
@@ -433,24 +435,27 @@ function compute_correlators_vectorized(ρ_vec::MPS, L::Int)
     quads = [(i,j,k,l) for i in 1:L for j in 1:L for k in 1:L for l in 1:L]
     
     # Compute correlation functions using vectorized correlator from local module
+    # This is the bottleneck - computing L⁴ correlators
     z2 = correlator(ρ_vec, ("Z", "Z"), pairs)
     z4 = correlator(ρ_vec, ("Z", "Z", "Z", "Z"), quads)
     
-    # Sum squared correlators
-    sum2_sq = 0.0
-    @inbounds for (i,j) in pairs
+    # Parallelize summation over threads (small gain but helps)
+    sum2_sq = zeros(Float64, nthreads())
+    @threads for idx in 1:length(pairs)
+        (i,j) = pairs[idx]
         v = real(z2[(i,j)])
-        sum2_sq += v*v
+        sum2_sq[threadid()] += v*v
     end
     
-    sum4_sq = 0.0
-    @inbounds for (i,j,k,l) in quads
+    sum4_sq = zeros(Float64, nthreads())
+    @threads for idx in 1:length(quads)
+        (i,j,k,l) = quads[idx]
         v = real(z4[(i,j,k,l)])
-        sum4_sq += v*v
+        sum4_sq[threadid()] += v*v
     end
     
-    M2sq = sum2_sq / L^2
-    M4sq = sum4_sq / L^4
+    M2sq = sum(sum2_sq) / L^2
+    M4sq = sum(sum4_sq) / L^4
     
     return M2sq, M4sq
 end
