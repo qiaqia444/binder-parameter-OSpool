@@ -14,8 +14,16 @@ using Random, Statistics
 using ITensors, ITensorMPS
 using LinearAlgebra
 
+# Import types for MixedStateMPS
+include("types.jl")
+using .Main: MixedStateMPS, get_mps
+
 export evolve_density_matrix_one_trial
 export ea_binder_density_matrix
+
+# Import vectorized correlators module
+include("correlators_vectorized.jl")
+using .ITensorCorrelators: correlator
 
 # Pauli matrices
 const σx = Float64[0 1; 1 0]
@@ -201,7 +209,8 @@ end
 
 Calculate Edwards-Anderson Binder parameter using MixedStateMPS.
 
-Each trial evolves a full density matrix. Disorder/measurement averaging over trials.
+Each trial evolves a full density matrix. Uses vectorized correlator for computing
+expectation values via <1|O|ρ> = Tr(O·ρ).
 """
 function ea_binder_density_matrix(L::Int; 
                                   lambda_x::Float64, 
@@ -234,8 +243,11 @@ function ea_binder_density_matrix(L::Int;
         ρ = get_mps(state)
         ρ = ρ / doubledtrace(ρ)
         
-        # Compute correlators for mixed state
-        M2sq, M4sq = compute_correlators_mixed(ρ, L; cutoff=cutoff)
+        # Convert MixedStateMPS (doubled) to vectorized density matrix
+        ρ_vec = mixed_to_vectorized(ρ, L)
+        
+        # Compute correlators using vectorized correlator <1|O|ρ>
+        M2sq, M4sq = compute_correlators_vectorized(ρ_vec, L)
         
         # Compute Binder parameter
         den = 3.0 * max(M2sq^2, 1e-12)
@@ -290,67 +302,155 @@ function doubledtrace(ρ::MPS)
 end
 
 """
-    compute_correlators_mixed(ρ, L; cutoff)
+    mixed_to_vectorized(ρ_mixed::MPS, L::Int) -> MPS
 
-Compute correlators for EA Binder parameter.
-CORRECTED version based on bug guide.
+Convert MixedStateMPS (doubled representation) to vectorized density matrix.
+
+MixedStateMPS has 2L sites with pairs (bra, ket) for each physical site.
+Vectorized MPS has L sites, each with dim=d² encoding the density matrix.
+
+For qubits: each physical site (i,j) element → vectorized index α = i + (j-1)*d
 """
-function corr_ZZ(ρ::MPS, i::Int, j::Int)
-    sites = siteinds(ρ)
-    tr = doubledtrace(ρ)
+function mixed_to_vectorized(ρ_mixed::MPS, L::Int)
+    d = 2  # Qubits
     
-    if i == j
-        # ⟨Z_i Z_i⟩ = ⟨Z²⟩ = ⟨I⟩ = 1
-        return 1.0
-    elseif abs(i - j) == 1
-        # Nearest neighbors: can use M_bra with kron(σz, σz)
-        pos = min(i, j)
-        M = kron(σz, σz)
-        bra = M_bra(sites, M, pos)
-        return real(inner(bra, ρ) / tr)
-    else
-        # Non-nearest neighbors: apply two single-site Z operators
-        # ⟨Z_i Z_j⟩ = Tr(ρ · Z_i · Z_j) = inner(bell, Z_i · Z_j · ρ)
-        # Apply Z to ket indices (even)
-        bra = bell(sites)
-        Z_i = op(σz, sites[2*i])
-        Z_j = op(σz, sites[2*j])
-        bra = apply([Z_i, Z_j], bra; cutoff=1e-14)
-        return real(inner(bra, ρ) / tr)
+    # Get site indices from mixed state
+    sites_mixed = siteinds(ρ_mixed)
+    @assert length(sites_mixed) == 2*L "MixedStateMPS must have 2L sites"
+    
+    # Create vectorized site indices (dim = d²)
+    sites_vec = [Index(d^2, "DM,n=$n") for n in 1:L]
+    
+    # Build vectorized MPS tensors
+    vec_tensors = Vector{ITensor}(undef, L)
+    
+    # For each physical site, extract density matrix elements
+    for n in 1:L
+        bra_site = sites_mixed[2n-1]  # Odd index: bra
+        ket_site = sites_mixed[2n]    # Even index: ket
+        
+        # Get the tensor(s) from mixed state for this physical site
+        # The MPS structure may have bond indices connecting sites
+        T_bra = ρ_mixed[2n-1]
+        T_ket = ρ_mixed[2n]
+        
+        # Get bond indices
+        all_inds_bra = inds(T_bra)
+        all_inds_ket = inds(T_ket)
+        bond_inds_bra = setdiff(all_inds_bra, [bra_site])
+        bond_inds_ket = setdiff(all_inds_ket, [ket_site])
+        
+        # Contract the bra and ket tensors to get the density matrix elements
+        # This is complex - we need to extract ρᵢⱼ = ⟨i|ρ|j⟩
+        
+        # For simplicity, contract the two tensors for this site pair
+        T_pair = T_bra * T_ket
+        
+        # Get remaining bond indices (left and right)
+        pair_inds = inds(T_pair)
+        site_inds = [bra_site, ket_site]
+        bond_inds = setdiff(pair_inds, site_inds)
+        
+        # Create vectorized tensor
+        if length(bond_inds) == 0
+            # No bond dimension - product state
+            T_vec = ITensor(sites_vec[n])
+            for i in 1:d, j in 1:d
+                α = i + (j-1)*d
+                coeff = T_pair[bra_site => i, ket_site => j]
+                T_vec[sites_vec[n] => α] = coeff
+            end
+        elseif length(bond_inds) == 2
+            # Two bond indices (typical case)
+            bond_left = bond_inds[1]
+            bond_right = bond_inds[2]
+            dim_left = dim(bond_left)
+            dim_right = dim(bond_right)
+            
+            T_vec = ITensor(sites_vec[n], bond_left, bond_right)
+            
+            for i in 1:d, j in 1:d, bl in 1:dim_left, br in 1:dim_right
+                α = i + (j-1)*d
+                coeff = T_pair[bra_site => i, ket_site => j, bond_left => bl, bond_right => br]
+                T_vec[sites_vec[n] => α, bond_left => bl, bond_right => br] = coeff
+            end
+        else
+            # One bond index (first or last site)
+            bond = bond_inds[1]
+            dim_bond = dim(bond)
+            
+            T_vec = ITensor(sites_vec[n], bond)
+            
+            for i in 1:d, j in 1:d, b in 1:dim_bond
+                α = i + (j-1)*d
+                coeff = T_pair[bra_site => i, ket_site => j, bond => b]
+                T_vec[sites_vec[n] => α, bond => b] = coeff
+            end
+        end
+        
+        vec_tensors[n] = T_vec
     end
+    
+    return MPS(vec_tensors)
 end
 
-function compute_correlators_mixed(ρ::MPS, L::Int; cutoff=1e-12)
-    sites = siteinds(ρ)
-    tr = doubledtrace(ρ)
+"""
+Define vectorized Z operator for d²-dimensional site indices.
+"""
+function make_vectorized_Z_op(s::Index)
+    d = 2  # Qubits
+    T = ITensor(s, s')
+    # For Z ⊗ I (acting on left): (Z⊗I) |ρ⟩ = |Zρ⟩
+    # α = i + (j-1)*d, β = k + (l-1)*d
+    # (Z⊗I)_{αβ} with Zᵢₖ δⱼₗ where Z = diag(1,-1)
+    for i in 1:d, j in 1:d, k in 1:d, l in 1:d
+        α = i + (j-1)*d
+        β = k + (l-1)*d
+        if j == l  # j must equal l
+            # Z matrix elements: diag(1, -1)
+            Z_ik = (i == k) ? (i == 1 ? 1.0 : -1.0) : 0.0
+            if Z_ik != 0
+                T[s=>α, s'=>β] = Z_ik
+            end
+        end
+    end
+    return T
+end
+
+# Register Z operator for vectorized density matrices
+ITensors.op(::OpName"Z", ::SiteType"DM", s::Index) = make_vectorized_Z_op(s)
+
+"""
+    compute_correlators_vectorized(ρ_vec::MPS, L::Int) -> (M2sq, M4sq)
+
+Compute M₂ and M₄ using vectorized density matrix correlator function.
+
+Uses correlator from correlators_vectorized.jl which computes <1|O|ρ> for vectorized |ρ⟩.
+"""
+function compute_correlators_vectorized(ρ_vec::MPS, L::Int)
+    # Generate all pairs and quads
+    pairs = [(i,j) for i in 1:L for j in 1:L]
+    quads = [(i,j,k,l) for i in 1:L for j in 1:L for k in 1:L for l in 1:L]
     
-    # 2-point correlators: compute all C_ij = ⟨Z_i Z_j⟩
+    # Compute correlation functions using vectorized correlator from local module
+    z2 = correlator(ρ_vec, ("Z", "Z"), pairs)
+    z4 = correlator(ρ_vec, ("Z", "Z", "Z", "Z"), quads)
+    
+    # Sum squared correlators
     sum2_sq = 0.0
-    for i in 1:L, j in 1:L
-        C_ij = corr_ZZ(ρ, i, j)
-        sum2_sq += C_ij^2
+    @inbounds for (i,j) in pairs
+        v = real(z2[(i,j)])
+        sum2_sq += v*v
     end
     
-    # 4-point correlators: ⟨Z_i Z_j Z_k Z_l⟩
-    # Always apply all four Z operators sequentially (duplicates cancel: Z²=I)
-    n_samples = min(1000, L^4)
     sum4_sq = 0.0
-    
-    for _ in 1:n_samples
-        indices = rand(1:L, 4)
-        
-        # Apply four Z operators sequentially to ket legs
-        bra = bell(sites)
-        for idx in indices
-            Z_gate = op(σz, sites[2*idx])
-            bra = apply(Z_gate, bra; cutoff=1e-14)
-        end
-        corr = real(inner(bra, ρ) / tr)
-        sum4_sq += corr^2
+    @inbounds for (i,j,k,l) in quads
+        v = real(z4[(i,j,k,l)])
+        sum4_sq += v*v
     end
     
     M2sq = sum2_sq / L^2
-    M4sq = (sum4_sq / n_samples) * L^4 / L^4
+    M4sq = sum4_sq / L^4
     
     return M2sq, M4sq
 end
