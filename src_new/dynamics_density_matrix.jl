@@ -593,13 +593,13 @@ function compute_correlators_vectorized(ρ_vec::MPS, L::Int)
     sum2_sq = zeros(Float64, nthreads())
     @threads for idx in 1:length(pairs)
         (i,j) = pairs[idx]
-        sum2_sq += abs2(z2[(i,j)])
+        sum2_sq[threadid()] += abs2(z2[(i,j)])
     end
     
     sum4_sq = zeros(Float64, nthreads())
     @threads for idx in 1:length(quads)
         (i,j,k,l) = quads[idx]
-        sum2_sq += abs2(z4[(i,j,k,l)])
+        sum4_sq[threadid()] += abs2(z4[(i,j,k,l)])
     end
     
     M2sq = sum(sum2_sq) / L^2
