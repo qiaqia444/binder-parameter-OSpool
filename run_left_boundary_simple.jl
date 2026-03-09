@@ -21,8 +21,8 @@ include("src_new/dynamics_density_matrix.jl")
 
 # === EDIT THESE PARAMETERS ===
 L = 8                    # System size
-lambda_x = 0.3          # X measurement strength (FIXED)
-lambda_zz = 0.0         # ZZ measurement strength (0 for pure X scan)
+lambda_x = 0.0          # X measurement strength (FIXED)
+lambda_zz = 0.7         # ZZ measurement strength
 P_steps = 11            # Number of P values
 P_min = 0.0             # Minimum P_x
 P_max = 0.5             # Maximum P_x

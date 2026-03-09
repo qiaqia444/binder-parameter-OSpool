@@ -101,7 +101,7 @@ function plot_binder_vs_px(stats)
 end
 
 function main()
-    results_dir = "left_boundary_results_20260223_0001"
+    results_dir = "left_boundary_results_20260309_1311"
     
     if !isdir(results_dir)
         return

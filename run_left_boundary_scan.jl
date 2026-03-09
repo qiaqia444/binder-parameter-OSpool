@@ -34,12 +34,12 @@ function parse_commandline()
         "--lambda_x"
             help = "X measurement strength (FIXED)"
             arg_type = Float64
-            default = 0.3
+            default = 0.0
         
         "--lambda_zz"
-            help = "ZZ measurement strength (FIXED) - typically 0 for left boundary"
+            help = "ZZ measurement strength (FIXED)"
             arg_type = Float64
-            default = 0.0
+            default = 0.7
         
         "--P_min"
             help = "Minimum dephasing probability"

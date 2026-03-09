@@ -65,6 +65,155 @@ Evolve density matrix using MixedStateMPS (doubled MPS representation).
 # Returns
 - `state::MixedStateMPS`: Final density matrix
 """
+
+function evolve_density_matrix_one_trial(L::Int; 
+                                         lambda_x::Float64, 
+                                         lambda_zz::Float64,
+                                         P_x::Float64=0.0, 
+                                         P_zz::Float64=0.0,
+                                         maxdim::Int=256, 
+                                         cutoff::Float64=1e-12,
+                                         rng=Random.GLOBAL_RNG)
+
+    # Initialize as |↑↑...↑⟩⟨↑↑...↑| in doubled representation
+    # Sites: 1,2 = site 1 (bra, ket), 3,4 = site 2 (bra, ket), ...
+    sites = siteinds("Qubit", 2L)
+    ρ = MPS(sites, _ -> "Up")
+
+    T_max = 50 * L
+
+    # Save state after X noise on final timestep (for Binder calculation)
+    ρ_after_X_noise = nothing
+
+    I2 = Matrix{Float64}(I, 2, 2)
+    I4 = Matrix{Float64}(I, 4, 4)
+    ZZ_2site = kron(σz, σz)
+
+    for t in 1:T_max
+        # --------------------------------------------------
+        # Step 1: Weak X measurements on all sites
+        # --------------------------------------------------
+        if lambda_x > 0
+            for i in 1:L
+                bra_idx = 2i - 1
+                ket_idx = 2i
+
+                # Sample measurement outcome from <X> = Tr(ρ X) / Tr(ρ)
+                X_bra_state = M_bra(sites, σx, i)
+                tr = doubledtrace(ρ)
+                expval_X = real(inner(X_bra_state, ρ) / tr)
+
+                prob_0 = (1 + 2 * lambda_x / (1 + lambda_x^2) * expval_X) / 2
+                prob_0 = clamp(prob_0, 0.0, 1.0)
+                outcome = rand(rng) < prob_0 ? 0 : 1
+
+                # Π_m = (I + (-1)^m λ X) / sqrt(2(1+λ²))
+                Π = (I2 + (-1)^outcome * lambda_x * σx) / sqrt(2 * (1 + lambda_x^2))
+                Π_bra = op(Π, sites[bra_idx])
+                Π_ket = op(Π, sites[ket_idx])
+
+                ρ = apply([Π_bra, Π_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+
+                # Renormalize after sampled measurement
+                ρ = ρ / doubledtrace(ρ)
+            end
+        end
+
+        # --------------------------------------------------
+        # Step 2: X dephasing on all sites
+        # TRAJECTORY VERSION:
+        #   with prob 1-P_x: do nothing
+        #   with prob P_x:   ρ -> X ρ X
+        # --------------------------------------------------
+        if P_x > 0
+            for i in 1:L
+                if rand(rng) < P_x
+                    bra_idx = 2i - 1
+                    ket_idx = 2i
+
+                    X_bra = op(σx, sites[bra_idx])
+                    X_ket = op(σx, sites[ket_idx])
+
+                    ρ = apply([X_bra, X_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+
+                    # No renormalization needed:
+                    # X ρ X is unitary conjugation, so Tr(ρ) is preserved.
+                end
+            end
+        end
+
+        # Save state after X noise on final timestep
+        if t == T_max
+            ρ_after_X_noise = deepcopy(ρ)
+        end
+
+        # --------------------------------------------------
+        # Step 3: Weak ZZ measurements on adjacent bonds
+        # --------------------------------------------------
+        if lambda_zz > 0
+            for i in 1:(L - 1)
+                j = i + 1
+                bra_i = 2i - 1
+                ket_i = 2i
+                bra_j = 2j - 1
+                ket_j = 2j
+
+                # Sample measurement outcome from <Z_i Z_j> = Tr(ρ Z_i Z_j) / Tr(ρ)
+                ZZ_bra_state = M_bra(sites, ZZ_2site, i)
+                tr = doubledtrace(ρ)
+                expval_ZZ = real(inner(ZZ_bra_state, ρ) / tr)
+
+                prob_0 = (1 + 2 * lambda_zz / (1 + lambda_zz^2) * expval_ZZ) / 2
+                prob_0 = clamp(prob_0, 0.0, 1.0)
+                outcome = rand(rng) < prob_0 ? 0 : 1
+
+                # K_m = (I₄ + (-1)^m λ_zz (Z⊗Z)) / sqrt(2(1+λ_zz²))
+                K_m = (I4 + (-1)^outcome * lambda_zz * ZZ_2site) / sqrt(2 * (1 + lambda_zz^2))
+
+                K_bra = op(K_m, sites[bra_i], sites[bra_j])
+                K_ket = op(K_m, sites[ket_i], sites[ket_j])
+
+                ρ = apply([K_bra, K_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+
+                # Renormalize after sampled measurement
+                ρ = ρ / doubledtrace(ρ)
+            end
+        end
+
+        # --------------------------------------------------
+        # Step 4: ZZ dephasing on adjacent bonds
+        # TRAJECTORY VERSION:
+        #   with prob 1-P_zz: do nothing
+        #   with prob P_zz:   ρ -> (ZZ) ρ (ZZ)
+        # --------------------------------------------------
+        if P_zz > 0
+            for i in 1:(L - 1)
+                j = i + 1
+
+                if rand(rng) < P_zz
+                    bra_i = 2i - 1
+                    ket_i = 2i
+                    bra_j = 2j - 1
+                    ket_j = 2j
+
+                    ZZ_bra = op(ZZ_2site, sites[bra_i], sites[bra_j])
+                    ZZ_ket = op(ZZ_2site, sites[ket_i], sites[ket_j])
+
+                    ρ = apply([ZZ_bra, ZZ_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+
+                    # No renormalization needed:
+                    # ZZ ρ ZZ is unitary conjugation, so Tr(ρ) is preserved.
+                end
+            end
+        end
+    end
+
+    # Return state after X noise on final timestep
+    ρ_return = isnothing(ρ_after_X_noise) ? ρ : ρ_after_X_noise
+    return MixedStateMPS(ρ_return), sites
+end
+
+"""
 function evolve_density_matrix_one_trial(L::Int; 
                                          lambda_x::Float64, 
                                          lambda_zz::Float64,
@@ -204,6 +353,7 @@ function evolve_density_matrix_one_trial(L::Int;
     ρ_return = isnothing(ρ_after_X_noise) ? ρ : ρ_after_X_noise
     return MixedStateMPS(ρ_return), sites
 end
+"""
 
 """
     ea_binder_density_matrix(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
@@ -443,15 +593,13 @@ function compute_correlators_vectorized(ρ_vec::MPS, L::Int)
     sum2_sq = zeros(Float64, nthreads())
     @threads for idx in 1:length(pairs)
         (i,j) = pairs[idx]
-        v = real(z2[(i,j)])
-        sum2_sq[threadid()] += v*v
+        sum2_sq += abs2(z2[(i,j)])
     end
     
     sum4_sq = zeros(Float64, nthreads())
     @threads for idx in 1:length(quads)
         (i,j,k,l) = quads[idx]
-        v = real(z4[(i,j,k,l)])
-        sum4_sq[threadid()] += v*v
+        sum2_sq += abs2(z4[(i,j,k,l)])
     end
     
     M2sq = sum(sum2_sq) / L^2
