@@ -29,10 +29,10 @@ fi
 
 echo "Found output directory with $(ls output/*.json 2>/dev/null | wc -l) result files"
 
-# Organize by system size (only lx0.00_lzz0.30 files)
-echo "Organizing results by system size (λ_x=0.0, λ_zz=0.3 only)..."
+# Organize by system size (only lx0.00_lzz0.70 files)
+echo "Organizing results by system size (λ_x=0.0, λ_zz=0.7 only)..."
 for L in 8 10 12 14 16; do
-    cp output/left_boundary_L${L}_lx0.00_lzz0.30_*.json "../${RESULTS_DIR}/L${L}/" 2>/dev/null
+    cp output/left_boundary_L${L}_lx0.00_lzz0.70_*.json "../${RESULTS_DIR}/L${L}/" 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
     echo "  L=$L: $count files"
 done
