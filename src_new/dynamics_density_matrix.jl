@@ -66,6 +66,10 @@ Evolve density matrix using MixedStateMPS (doubled MPS representation).
 - `state::MixedStateMPS`: Final density matrix
 """
 
+"""
+TRAJECTORY SAMPLING VERSION (COMMENTED OUT - requires lambda_x > 0 for entanglement)
+This version samples jump vs no-jump for dephasing channels.
+
 function evolve_density_matrix_one_trial(L::Int; 
                                          lambda_x::Float64, 
                                          lambda_zz::Float64,
@@ -214,6 +218,12 @@ function evolve_density_matrix_one_trial(L::Int;
 end
 
 """
+
+"""
+CHANNEL AVERAGING VERSION (ACTIVE - works with lambda_x = 0)
+This version applies dephasing as linear combination: ρ → (1-P)ρ + P·U·ρ·U†
+Creates mixed states even without measurements (lambda_x = 0).
+"""
 function evolve_density_matrix_one_trial(L::Int; 
                                          lambda_x::Float64, 
                                          lambda_zz::Float64,
@@ -353,8 +363,6 @@ function evolve_density_matrix_one_trial(L::Int;
     ρ_return = isnothing(ρ_after_X_noise) ? ρ : ρ_after_X_noise
     return MixedStateMPS(ρ_return), sites
 end
-"""
-
 """
     ea_binder_density_matrix(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
 
