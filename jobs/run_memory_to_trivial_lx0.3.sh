@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# HTCondor job script for memory-to-trivial transition scan (λ_x = 0.3)
-# Density matrix evolution with dephasing channels
+# HTCondor job script for memory-to-trivial transition scan (λ_x = 0.21, λ_zz = 0.49)
+# Density matrix evolution with dephasing channels (optimized implementation)
+# Time limit: 24 hours per trial
 
 # Get individual arguments from HTCondor
 L=$1
@@ -14,7 +15,7 @@ seed=$7
 sample=$8
 out_prefix=$9
 
-echo "=== Memory-to-Trivial Transition Scan Job Start (λ_x = 0.3) ==="
+echo "=== Memory-to-Trivial Transition Scan Job Start (λ_x = 0.21, λ_zz = 0.49) ==="
 echo "Job started at: $(date)"
 echo "Running on: $(hostname)"
 echo "Parameters: L=$L lambda_x=$lambda_x lambda_zz=$lambda_zz P_x=$P_x P_zz=$P_zz ntrials=$ntrials seed=$seed sample=$sample"

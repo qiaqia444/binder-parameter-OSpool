@@ -20,6 +20,7 @@ include("types.jl")
 using .Main: MixedStateMPS, get_mps
 
 export evolve_density_matrix_one_trial
+export evolve_density_matrix_one_trial_new
 export ea_binder_density_matrix
 
 # Import vectorized correlators module
@@ -363,6 +364,164 @@ function evolve_density_matrix_one_trial(L::Int;
     ρ_return = isnothing(ρ_after_X_noise) ? ρ : ρ_after_X_noise
     return MixedStateMPS(ρ_return), sites
 end
+
+"""
+    evolve_density_matrix_one_trial_new(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
+
+Optimized version: Apply dephasing as CHANNEL GATES instead of explicit MPS addition.
+
+Key optimization: Instead of (1-P)ρ + P·U·ρ·U†, apply as single superoperator gate:
+    G_channel = [(1-P)I + P·U] acting on ρ directly
+    
+This avoids creating two separate MPS objects and merging bonds.
+Traces are preserved automatically via gate structure.
+
+# Arguments
+Same as evolve_density_matrix_one_trial
+"""
+function evolve_density_matrix_one_trial_new(L::Int; 
+                                             lambda_x::Float64, 
+                                             lambda_zz::Float64,
+                                             P_x::Float64=0.0, 
+                                             P_zz::Float64=0.0,
+                                             maxdim::Int=256, 
+                                             cutoff::Float64=1e-12,
+                                             rng=Random.GLOBAL_RNG,
+                                             seed::Union{Nothing,Int}=nothing)
+    # Initialize as |↑↑...↑⟩⟨↑↑...↑| in doubled representation
+    sites = siteinds("Qubit", 2L)
+    ρ = MPS(sites, _ -> "Up")
+    
+    # Handle seed parameter
+    if !isnothing(seed)
+        rng = Random.MersenneTwister(seed)
+    end
+    
+    T_max = 50 * L
+    ρ_after_X_noise = nothing
+    
+    # --------------------------------------------------
+    # PRECOMPUTE CHANNEL GATES (once, before time evolution)
+    # --------------------------------------------------
+    I2 = Matrix{Float64}(I, 2, 2)
+    I4 = Matrix{Float64}(I, 4, 4)
+    ZZ_2site = kron(σz, σz)
+    
+    # X dephasing channel: G_x(i) = (1-P_x)·I + P_x·(X_bra ⊗ X_ket)
+    x_channel_gates = Vector{ITensor}(undef, L)
+    if P_x > 0
+        for i in 1:L
+            bra_idx = 2i - 1
+            ket_idx = 2i
+            I_bra = op("Id", sites[bra_idx])
+            I_ket = op("Id", sites[ket_idx])
+            X_bra = op(σx, sites[bra_idx])
+            X_ket = op(σx, sites[ket_idx])
+            x_channel_gates[i] = (1 - P_x) * (I_bra * I_ket) + P_x * (X_bra * X_ket)
+        end
+    end
+    
+    # ZZ dephasing channel: G_zz(i,i+1) = (1-P_zz)·I + P_zz·(ZZ_bra ⊗ ZZ_ket)
+    zz_channel_gates = Vector{ITensor}(undef, max(L-1, 0))
+    if P_zz > 0
+        for i in 1:(L-1)
+            j = i + 1
+            bra_i = 2i - 1
+            ket_i = 2i
+            bra_j = 2j - 1
+            ket_j = 2j
+
+            I_gate = op("Id", sites[bra_i]) * op("Id", sites[bra_j]) *
+                     op("Id", sites[ket_i]) * op("Id", sites[ket_j])
+
+            ZZ_gate = op(σz, sites[bra_i]) * op(σz, sites[bra_j]) *
+                      op(σz, sites[ket_i]) * op(σz, sites[ket_j])
+
+            zz_channel_gates[i] = (1 - P_zz) * I_gate + P_zz * ZZ_gate
+        end
+    end
+    
+    # --------------------------------------------------
+    # TIME EVOLUTION LOOP
+    # --------------------------------------------------
+    for t in 1:T_max
+        # Step 1: Weak X measurements on all sites
+        if lambda_x > 0
+            for i in 1:L
+                bra_idx = 2i - 1
+                ket_idx = 2i
+                
+                X_bra_state = M_bra(sites, σx, i)
+                tr = doubledtrace(ρ)
+                expval_X = real(inner(X_bra_state, ρ) / tr)
+                
+                prob_0 = (1 + 2*lambda_x/(1+lambda_x^2)*expval_X) / 2
+                prob_0 = clamp(prob_0, 0.0, 1.0)
+                outcome = rand(rng) < prob_0 ? 0 : 1
+                
+                Π = (I(2) + (-1)^outcome * lambda_x * σx) / sqrt(2*(1+lambda_x^2))
+                Π_bra = op(Π, sites[bra_idx])
+                Π_ket = op(Π, sites[ket_idx])
+                
+                ρ = apply([Π_bra, Π_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+                ρ = ρ / doubledtrace(ρ)
+            end
+        end
+        
+        # Step 2: X dephasing via CHANNEL GATES (no MPS addition!)
+        if P_x > 0
+            for i in 1:L
+                ρ = apply(x_channel_gates[i], ρ; cutoff=cutoff, maxdim=maxdim)
+            end
+        end
+        
+        # Save strobe point
+        if t == T_max
+            ρ_after_X_noise = deepcopy(ρ)
+        end
+        
+        # Step 3: Weak ZZ measurements on adjacent bonds
+        if lambda_zz > 0
+            for i in 1:(L-1)
+                j = i + 1
+                bra_i = 2i - 1
+                ket_i = 2i
+                bra_j = 2j - 1
+                ket_j = 2j
+                
+                ZZ = kron(σz, σz)
+                ZZ_bra_state = M_bra(sites, ZZ, i)
+                tr = doubledtrace(ρ)
+                expval_ZZ = real(inner(ZZ_bra_state, ρ) / tr)
+                
+                prob_0 = (1 + 2*lambda_zz/(1+lambda_zz^2)*expval_ZZ) / 2
+                prob_0 = clamp(prob_0, 0.0, 1.0)
+                outcome = rand(rng) < prob_0 ? 0 : 1
+                
+                I4 = Matrix{Float64}(I, 4, 4)
+                ZZ_2site = kron(σz, σz)
+                K_m = (I4 + (-1)^outcome * lambda_zz * ZZ_2site) / sqrt(2*(1+lambda_zz^2))
+                
+                K_ket = op(K_m, sites[ket_i], sites[ket_j])
+                K_bra = op(K_m, sites[bra_i], sites[bra_j])
+                
+                ρ = apply([K_bra, K_ket], ρ; cutoff=cutoff, maxdim=maxdim)
+                ρ = ρ / doubledtrace(ρ)
+            end
+        end
+        
+        # Step 4: ZZ dephasing via CHANNEL GATES (no MPS addition!)
+        if P_zz > 0
+            for i in 1:(L-1)
+                ρ = apply(zz_channel_gates[i], ρ; cutoff=cutoff, maxdim=maxdim)
+            end
+        end
+    end
+    
+    ρ_return = isnothing(ρ_after_X_noise) ? ρ : ρ_after_X_noise
+    return MixedStateMPS(ρ_return), sites
+end
+
 """
     ea_binder_density_matrix(L::Int; lambda_x, lambda_zz, P_x, P_zz, kwargs...)
 
@@ -389,7 +548,7 @@ function ea_binder_density_matrix(L::Int;
     
     for t in 1:ntrials
         # Evolve density matrix
-        state, _ = evolve_density_matrix_one_trial(L; 
+        state, _ = evolve_density_matrix_one_trial_new(L; 
                                                lambda_x=lambda_x, 
                                                lambda_zz=lambda_zz,
                                                P_x=P_x, 

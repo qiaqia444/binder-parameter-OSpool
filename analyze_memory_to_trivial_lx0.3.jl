@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-Analyze Memory-to-Trivial Transition Scan Results (λ_x = 0.3) - Plot Generation Only
+Analyze Memory-to-Trivial Transition Scan Results (λ_x = 0.21, λ_zz = 0.49) - Plot Generation Only
 
 Load all JSON files, compute statistics, and generate plots.
 Properly groups by (L, lambda_x, lambda_zz, P_x) to avoid mixing different parameter sets.
@@ -15,7 +15,7 @@ using Plots
 using LaTeXStrings
 
 function load_results(results_dir)
-    """Load all JSON files from the results directory - only lx0.30_lzz0.70_P*.json files."""
+    """Load all JSON files from the results directory - only lx0.21_lzz0.49_P*.json files."""
     all_data = []
     
     for L in [8, 10, 12, 14, 16]
@@ -24,8 +24,8 @@ function load_results(results_dir)
             continue
         end
         
-        # Only load files matching the pattern: memory_to_trivial_L*_lx0.30_lzz0.70_P*.json
-        json_files = filter(f -> contains(f, "lx0.30_lzz0.70_P") && endswith(f, ".json"), 
+        # Only load files matching the pattern: memory_to_trivial_L*_lx0.21_lzz0.49_P*.json
+        json_files = filter(f -> contains(f, "lx0.21_lzz0.49_P") && endswith(f, ".json"), 
                            readdir(L_dir, join=true))
         
         for file in json_files
@@ -133,10 +133,10 @@ end
 function print_summary(stats)
     """Print summary statistics."""
     println("\n" * "="^80)
-    println("MEMORY-TO-TRIVIAL TRANSITION ANALYSIS SUMMARY (λ_x = 0.3)")
+    println("MEMORY-TO-TRIVIAL TRANSITION ANALYSIS SUMMARY (λ_x = 0.21, λ_zz = 0.49)")
     println("="^80)
     println("\nSystem Parameters:")
-    println("  λ_x = 0.3 (X measurement strength)")
+    println("  λ_x = 0.21 (X measurement strength), λ_zz = 0.49 (ZZ measurement strength)")
     println("  λ_zz = 0.7 (ZZ measurement strength)")
     println("  P_x = P_zz scanning from 0 to 0.5")
     
@@ -181,7 +181,7 @@ function main()
     df = load_results(results_dir)
     
     if nrow(df) == 0
-        println("ERROR: No data loaded. Check that results directory contains lx0.30_lzz0.70_P*.json files")
+        println("ERROR: No data loaded. Check that results directory contains lx0.21_lzz0.49_P*.json files")
         return
     end
     

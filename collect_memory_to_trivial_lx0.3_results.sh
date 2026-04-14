@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Collect and organize memory-to-trivial transition scan results (λ_x = 0.3)
+# Collect and organize memory-to-trivial transition scan results (λ_x = 0.21, λ_zz = 0.49)
 # Run this script after all HTCondor jobs complete
 
-echo "=== Memory-to-Trivial Transition Scan Results Collection (λ_x = 0.3) ==="
+echo "=== Memory-to-Trivial Transition Scan Results Collection (λ_x = 0.21, λ_zz = 0.49) ==="
 echo "Starting collection at: $(date)"
 
 # Create timestamped results directory
@@ -29,13 +29,31 @@ fi
 
 echo "Found output directory with $(ls output/*.json 2>/dev/null | wc -l) result files"
 
-# Organize by system size (collect ALL lx0.30 lzz0.70 files, no time filter)
-echo "Collecting ALL λ_x=0.3, λ_zz=0.7 files..."
+# Validate that we're collecting from correct parameter set
+echo "Validating parameter set..."
+EXPECTED_LAMBDA_X="0.21"
+EXPECTED_LAMBDA_ZZ="0.49"
+SAMPLE_FILE=$(ls output/memory_to_trivial_L*_lx0.21_lzz0.49_*.json 2>/dev/null | head -1)
+
+if [ -z "$SAMPLE_FILE" ]; then
+    echo "ERROR: No files found matching pattern memory_to_trivial_L*_lx0.21_lzz0.49_*.json"
+    echo "Please check that jobs have completed and output files exist."
+    exit 1
+fi
+
+echo "✓ Found output files with corrected parameters (λ_x=$EXPECTED_LAMBDA_X, λ_zz=$EXPECTED_LAMBDA_ZZ)"
+
+# Organize by system size (collect ALL lx0.21 lzz0.49 files, no time filter)
+echo "Collecting ALL λ_x=$EXPECTED_LAMBDA_X, λ_zz=$EXPECTED_LAMBDA_ZZ files..."
 for L in 8 10 12 14 16; do
     # Collect all files matching pattern (no -mtime filter)
-    find output -name "memory_to_trivial_L${L}_lx0.30_lzz0.70_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
+    find output -name "memory_to_trivial_L${L}_lx0.21_lzz0.49_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
-    echo "  L=$L: $count files"
+    if [ $count -gt 0 ]; then
+        echo "  L=$L: $count files collected"
+    else
+        echo "  L=$L: 0 files (jobs may still be running or not yet started)"
+    fi
 done
 
 # Count total results
@@ -45,7 +63,8 @@ echo "Total results collected: $total_count files"
 
 # Check for failures
 cd jobs
-failure_count=$(ls output/memory_to_trivial_*_FAILED.json 2>/dev/null | wc -l)
+failure_files=$(ls output/memory_to_trivial_*_FAILED.json 2>/dev/null)
+failure_count=$(echo "$failure_files" | grep -c "FAILED" 2>/dev/null || echo "0")
 if [ $failure_count -gt 0 ]; then
     echo "WARNING: Found $failure_count failed jobs"
     mkdir -p "../${RESULTS_DIR}/failed"
@@ -53,6 +72,38 @@ if [ $failure_count -gt 0 ]; then
     echo "Failure files copied to ${RESULTS_DIR}/failed/"
 fi
 cd ..
+
+# Validate collected data
+echo ""
+echo "=== Data Validation ==="
+validation_errors=0
+
+# Check if we have the expected parameter values in collected files
+if [ $total_count -gt 0 ]; then
+    # Sample check: verify first file has correct parameters
+    sample=$(find "$RESULTS_DIR" -name "*.json" | head -1)
+    if [ ! -z "$sample" ]; then
+        # Extract job name from filename to verify parameters
+        filename=$(basename "$sample")
+        if [[ $filename == *"lx0.21_lzz0.49"* ]]; then
+            echo "✓ Collected files contain correct parameter set (λ_x=0.21, λ_zz=0.49)"
+        else
+            echo "✗ WARNING: Filename pattern mismatch in $filename"
+            validation_errors=$((validation_errors + 1))
+        fi
+    fi
+fi
+
+# Check if collection is complete
+expected_total=2200  # Should have 2200 parameter sets
+if [ $total_count -lt $expected_total ]; then
+    missing=$((expected_total - total_count))
+    echo "⏳ Incomplete collection: $missing/$expected_total files still missing"
+    echo "   (Jobs are still running. 24-hour time limit per trial)"
+    validation_errors=$((validation_errors + 1))
+else
+    echo "✓ Collection complete: All $total_count files collected"
+fi
 
 # Create archive
 echo "Creating compressed archive..."
@@ -66,9 +117,25 @@ echo "=== Collection Summary ==="
 echo "Results directory: $RESULTS_DIR"
 echo "Archive: ${RESULTS_DIR}.tar.gz"
 echo "Archive size: $ARCHIVE_SIZE"
-echo "Total files: $total_count"
+echo "Total files collected: $total_count / 2200 (expected)"
 echo "Failed jobs: $failure_count"
+echo "Parameters: λ_x = 0.21 (X measurements), λ_zz = 0.49 (ZZ measurements)"
+echo "Timeout per trial: 24 hours (86400 seconds)"
 echo ""
+
+# Per-system-size breakdown
+echo "=== Files by System Size ==="
+for L in 8 10 12 14 16; do
+    count=$(find "$RESULTS_DIR/L${L}" -name "*.json" 2>/dev/null | wc -l)
+    printf "  L=%-2d: %3d files\n" $L $count
+done
+echo ""
+
+if [ $validation_errors -eq 0 ]; then
+    echo "✓ Data validation passed!"
+else
+    echo "⚠ Data validation warnings detected (see above)"
+fi
 echo "=== Transfer to Mac with Magic Wormhole ==="
 echo "On cluster, run:"
 echo "  wormhole send ${RESULTS_DIR}.tar.gz"

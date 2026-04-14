@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Submit Memory-to-Trivial Transition Scan jobs (λ_x = 0.3)
+# Submit Memory-to-Trivial Transition Scan jobs (λ_x = 0.21, λ_zz = 0.49)
 
 echo "=========================================="
-echo "Submitting Memory-to-Trivial Scan Jobs (λ_x = 0.3)"
+echo "Submitting Memory-to-Trivial Scan Jobs (λ_x = 0.21, λ_zz = 0.49)"
 echo "=========================================="
 
 # Check if params file exists
@@ -20,11 +20,12 @@ echo "Found $NJOBS parameter sets in params_memory_to_trivial_lx0.3.txt"
 echo ""
 echo "Physics setup:"
 echo "  - Memory-to-trivial transition scan"
-echo "  - Fixed λ_x = 0.3 (X measurements)"
-echo "  - Fixed λ_zz = 0.7 (ZZ measurement strength)"
+echo "  - Fixed λ_x = 0.21 (X measurements)"
+echo "  - Fixed λ_zz = 0.49 (ZZ measurement strength)"
 echo "  - Scanning P_x from 0 to 0.5"
 echo "  - P_zz = P_x (coupled dephasing)"
-echo "  - Using DENSITY MATRIX evolution (correct physics!)"
+echo "  - Using DENSITY MATRIX evolution (optimized implementation)"
+echo "  - 24 hours per trial for improved statistics"
 echo ""
 
 echo "Submitting Memory-to-Trivial Scan jobs..."
@@ -33,9 +34,9 @@ condor_submit jobs_memory_to_trivial_lx0.3.submit
 cd ..
 
 echo ""
-echo "Memory-to-Trivial Scan jobs (λ_x = 0.3) submitted successfully!"
+echo "Memory-to-Trivial Scan jobs (λ_x = 0.21, λ_zz = 0.49) submitted successfully!"
 echo "   Jobs submitted: $NJOBS"
-echo "   Output files: output/memory_to_trivial_L*_lx0.30_lzz0.70_*.json"
+echo "   Output files: output/memory_to_trivial_L*_lx0.21_lzz0.49_*.json"
 echo ""
 echo "Monitor with: condor_q"
 echo "Check logs in: jobs/logs/"
