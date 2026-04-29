@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Collect and organize right boundary scan results
+# Run this script after all HTCondor jobs complete
+
+echo "=== Right Boundary Scan Results Collection ==="
+echo "Starting collection at: $(date)"
+
+# Create timestamped results directory
+TIMESTAMP=$(date +%Y%m%d_%H%M)
+RESULTS_DIR="right_boundary_results_${TIMESTAMP}"
+
+echo "Creating results directory: $RESULTS_DIR"
+mkdir -p "$RESULTS_DIR"
+
+# Create subdirectories for each system size
+for L in 8 10 12 14 16; do
+    mkdir -p "$RESULTS_DIR/L${L}"
+done
+
+# Navigate to jobs directory
+cd jobs
+
+# Check if output directory exists
+if [ ! -d "output" ]; then
+    echo "ERROR: No output directory found. Jobs may not have completed yet."
+    exit 1
+fi
+
+echo "Found output directory with $(ls output/*.json 2>/dev/null | wc -l) result files"
+
+# Organize by system size (collect ALL lx0.70 files with no ZZ)
+echo "Collecting ALL λ_x=0.7, λ_zz=0.0 files..."
+for L in 8 10 12 14 16; do
+    # Collect all files matching pattern (no -mtime filter)
+    find output -name "right_boundary_L${L}_lx0.70_lzz0.00_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
+    count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
+    echo "  L=$L: $count files"
+done
+
+# Count total results
+cd ..
+total_count=$(find "$RESULTS_DIR" -name "*.json" | wc -l)
+echo "Total results collected: $total_count files"
+
+# Check for failures
+cd jobs
+failure_count=$(ls output/right_boundary_*_FAILED.json 2>/dev/null | wc -l)
+if [ $failure_count -gt 0 ]; then
+    echo "WARNING: Found $failure_count failed jobs"
+    echo "  You may need to resubmit these jobs"
+else
+    echo "✓ No failed jobs detected"
+fi
+
+cd ..
+
+echo ""
+echo "✓ Results collection complete!"
+echo "  Results directory: $RESULTS_DIR"
+echo "  Total files: $total_count"
+echo ""
+echo "Next: Run analysis with: julia analyze_right_boundary.jl"
