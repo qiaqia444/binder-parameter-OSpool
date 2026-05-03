@@ -17,11 +17,12 @@ using Statistics
 using Dates
 using ITensors, ITensorMPS
 
-# Load modules in correct order
-include("src_new/types.jl")
-include("src_new/channels.jl")
-include("src_new/dynamics_density_matrix.jl")
-include("src_new/renyi2_binder.jl")
+# Load modules in correct order (resolve path relative to this script's directory)
+script_dir = dirname(abspath(@__FILE__))
+include(joinpath(script_dir, "src_new/types.jl"))
+include(joinpath(script_dir, "src_new/channels.jl"))
+include(joinpath(script_dir, "src_new/dynamics_density_matrix.jl"))
+include(joinpath(script_dir, "src_new/renyi2_binder.jl"))
 
 function parse_commandline()
     s = ArgParseSettings(description = "Right boundary scan: vary P_x at fixed λ_x with Rényi-2 Binder")
