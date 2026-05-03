@@ -39,6 +39,22 @@ export BLAS_NUM_THREADS=4
 
 echo "Threading enabled: JULIA_NUM_THREADS=$JULIA_NUM_THREADS"
 
+# CRITICAL: Ensure src_new directory is accessible
+echo "Setting up module accessibility..."
+if [ ! -d "src_new" ]; then
+    if [ -d "../src_new" ]; then
+        echo "Creating symlink: ln -s ../src_new src_new"
+        ln -s ../src_new src_new
+        echo "✓ Symlink created"
+    else
+        echo "✗ ERROR: src_new directory not found in current or parent directory!"
+        echo "Cannot proceed without src_new modules"
+        exit 1
+    fi
+else
+    echo "✓ src_new directory already present"
+fi
+
 # Install packages
 echo "Setting up Julia environment..."
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
