@@ -4,14 +4,18 @@
 # Assumes doubled-site ordering:
 #   (1_bra,1_ket,2_bra,2_ket,...,L_bra,L_ket)
 #
-# Define
-#   q_i = Z_(2i-1) Z_(2i)
+# Define (expectation-value-like observable):
+#   q_i = Z_(2i-1)   (bra layer only)
 #   Q   = sum_i q_i
 #
 # Then
 #   M2 = <ρ|Q^2|ρ> / (L^2 <ρ|ρ>)
 #   M4 = <ρ|Q^4|ρ> / (L^4 <ρ|ρ>)
 #   B  = 1 - M4 / (3 M2^2)
+#
+# Sanity checks:
+#   - All-up pure state: B_R = 2/3
+#   - Maximally mixed: B_R ≈ 2/(3L) → 0
 #
 # This avoids:
 #   - mixed_to_vectorized(...)
@@ -20,6 +24,7 @@
 # ============================================================
 
 export renyi2_order_mpo_doubled
+export renyi2_order_mpo_one_layer_doubled
 export renyi2_moments_doubled
 export renyi2_binder_doubled
 export renyi2_binder_density_matrix
@@ -65,6 +70,42 @@ function renyi2_order_mpo_doubled(sites, L::Int; opname::String="Z")
 end
 
 """
+    renyi2_order_mpo_one_layer_doubled(sites, L; opname="Z", layer=:bra)
+
+Build the MPO for
+
+    Q = Σ_i Z_i
+
+acting on only one layer of the doubled density-matrix MPS.
+
+For ordering:
+    (1_bra, 1_ket, 2_bra, 2_ket, ..., L_bra, L_ket)
+
+use:
+    layer = :bra  -> sites 1,3,5,...
+    layer = :ket  -> sites 2,4,6,...
+
+This is the "expectation-value-like" Rényi-2 observable.
+Maximally mixed gives B_R ≈ 2/(3L) → 0.
+"""
+function renyi2_order_mpo_one_layer_doubled(
+    sites,
+    L::Int;
+    opname::String="Z",
+    layer::Symbol=:bra,
+)
+    @assert length(sites) == 2L "Expected doubled MPS with 2L sites"
+    @assert layer in (:bra, :ket) "layer must be :bra or :ket"
+
+    os = OpSum()
+    for i in 1:L
+        site_idx = layer === :bra ? 2i - 1 : 2i
+        os += 1.0, opname, site_idx
+    end
+    return MPO(os, sites)
+end
+
+"""
     renyi2_moments_doubled(
         ρ::MPS,
         L::Int;
@@ -104,7 +145,8 @@ function renyi2_moments_doubled(
     @assert length(sites) == 2L "Expected doubled MPS with 2L sites"
 
     if Q === nothing
-        Q = renyi2_order_mpo_doubled(sites, L; opname="Z")
+        # Use one-layer observable by default
+        Q = renyi2_order_mpo_one_layer_doubled(sites, L; opname="Z", layer=:bra)
     end
 
     # Hilbert-Schmidt norm of the density matrix.
@@ -291,7 +333,8 @@ function renyi2_binder_density_matrix(
         ρ = ρ / doubledtrace(ρ)
 
         # Build the MPO for this trial (site indices must match current ρ)
-        Q_trial = renyi2_order_mpo_doubled(siteinds(ρ), L; opname="Z")
+        # Use one-layer observable: Q = Σ_i Z_i on bra layer
+        Q_trial = renyi2_order_mpo_one_layer_doubled(siteinds(ρ), L; opname="Z", layer=:bra)
 
         res = renyi2_binder_doubled(
             ρ, L;

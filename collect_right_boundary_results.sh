@@ -48,16 +48,40 @@ cd jobs
 failure_count=$(ls output/right_boundary_*_FAILED.json 2>/dev/null | wc -l)
 if [ $failure_count -gt 0 ]; then
     echo "WARNING: Found $failure_count failed jobs"
-    echo "  You may need to resubmit these jobs"
+    mkdir -p "../${RESULTS_DIR}/failed"
+    cp output/*_FAILED.json "../${RESULTS_DIR}/failed/" 2>/dev/null
+    echo "Failure files copied to ${RESULTS_DIR}/failed/"
 else
     echo "✓ No failed jobs detected"
 fi
 
 cd ..
 
+# Create archive
+echo "Creating compressed archive..."
+tar -czf "${RESULTS_DIR}.tar.gz" "$RESULTS_DIR"
+ARCHIVE_SIZE=$(du -h "${RESULTS_DIR}.tar.gz" | cut -f1)
+echo "Archive created: ${RESULTS_DIR}.tar.gz (${ARCHIVE_SIZE})"
+
+# Print summary
 echo ""
-echo "✓ Results collection complete!"
-echo "  Results directory: $RESULTS_DIR"
-echo "  Total files: $total_count"
+echo "=== Collection Summary ==="
+echo "Results directory: $RESULTS_DIR"
+echo "Archive: ${RESULTS_DIR}.tar.gz"
+echo "Archive size: $ARCHIVE_SIZE"
+echo "Total files: $total_count"
+echo "Failed jobs: $failure_count"
 echo ""
-echo "Next: Run analysis with: julia analyze_right_boundary.jl"
+echo "=== Transfer to Mac with Magic Wormhole ==="
+echo "On cluster, run:"
+echo "  wormhole send ${RESULTS_DIR}.tar.gz"
+echo ""
+echo "On your Mac, run:"
+echo "  wormhole receive"
+echo "  # Enter the wormhole code when prompted"
+echo ""
+echo "Then extract and analyze:"
+echo "  tar -xzf ${RESULTS_DIR}.tar.gz"
+echo "  julia analyze_right_boundary.jl"
+echo ""
+echo "Collection completed at: $(date)"
