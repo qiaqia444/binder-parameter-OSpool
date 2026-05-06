@@ -3,7 +3,7 @@
 """
 Learning-to-Trivial Lambda0.7 - Single Point Calculation
 
-Computes Rényi-2 Binder for one configuration using the new renyi2_dynamics pipeline.
+Computes Rényi-2 Binder for one configuration using the CORRECT dynamics pipeline.
 
 Usage (from HTCondor job):
     julia run_learning_to_trivial_lambda0.7_scan.jl \\
@@ -20,8 +20,12 @@ using Statistics
 using Dates
 using ITensors, ITensorMPS
 
-# Load the new renyi2 dynamics pipeline
-include("src_new/renyi2_dynamics.jl")
+# Load the CORRECTED separate pipeline (with channel averaging dephasing fix)
+include("src_new/types.jl")
+include("src_new/channels.jl")
+include("src_new/dynamics_density_matrix.jl")
+include("src_new/renyi2_binder.jl")
+include("src_new/renyi2_dynamics_separate.jl")
 
 function main()
     # Parse command-line arguments
@@ -57,10 +61,10 @@ function main()
     println("  sample = $sample")
     println()
     
-    println("Starting Rényi-2 Binder calculation...")
+    println("Starting Rényi-2 Binder calculation (using separate pipeline with corrected dephasing)...")
     t_start = time()
     
-    # Run calculation using new renyi2_dynamics pipeline
+    # Run calculation using CORRECTED separate pipeline with channel averaging dephasing
     result = renyi2_binder_density_matrix_separate(
         L;
         lambda_x = lambda_x,
@@ -71,8 +75,6 @@ function main()
         maxdim = 256,
         cutoff = 1e-12,
         seed = seed,
-        T_max = 2*L,
-        strobe = :after_full_layer,
         verbose = false,
     )
     
@@ -107,10 +109,10 @@ function main()
         "M4s" => result.M4s,
         "Bs" => result.Bs,
         "purities" => result.purities,
+        "reliabilities" => result.reliabilities,
         "ntrials" => result.ntrials,
         "n_valid" => result.n_valid,
         "n_invalid" => result.n_invalid,
-        "max_linkdim" => result.max_linkdim,
         "time_seconds" => t_elapsed,
         "timestamp" => Dates.format(now(), "yyyy-mm-dd HH:MM:SS"),
     )
