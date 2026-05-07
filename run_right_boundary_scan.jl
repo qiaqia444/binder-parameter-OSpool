@@ -21,7 +21,7 @@ using ITensors, ITensorMPS
 include("src_new/types.jl")
 include("src_new/channels.jl")
 include("src_new/dynamics_density_matrix.jl")
-include("src_new/renyi2_binder.jl")
+include("src_new/renyi2_dynamics_density_matrix_1.jl")
 
 function parse_commandline()
     s = ArgParseSettings(description = "Right boundary scan: vary P_x at fixed λ_x with Rényi-2 Binder")

@@ -18,7 +18,7 @@ using LinearAlgebra
 include("src_new/types.jl")
 include("src_new/channels.jl")
 include("src_new/dynamics_density_matrix.jl")
-include("src_new/renyi2_binder.jl")
+include("src_new/renyi2_dynamics_density_matrix_1.jl")
 
 # === EDIT THESE PARAMETERS ===
 L = 8                    # System size

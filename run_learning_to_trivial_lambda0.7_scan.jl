@@ -20,12 +20,11 @@ using Statistics
 using Dates
 using ITensors, ITensorMPS
 
-# Load the CORRECTED separate pipeline (with channel averaging dephasing fix)
+# Load consolidated Rényi-2 Binder dynamics module
 include("src_new/types.jl")
 include("src_new/channels.jl")
 include("src_new/dynamics_density_matrix.jl")
-include("src_new/renyi2_binder.jl")
-include("src_new/renyi2_dynamics_separate.jl")
+include("src_new/renyi2_dynamics_density_matrix_1.jl")
 
 function main()
     # Parse command-line arguments
@@ -65,7 +64,7 @@ function main()
     t_start = time()
     
     # Run calculation using CORRECTED separate pipeline with channel averaging dephasing
-    result = renyi2_binder_density_matrix_separate(
+    result = renyi2_binder_density_matrix_dynamics(
         L;
         lambda_x = lambda_x,
         lambda_zz = lambda_zz,

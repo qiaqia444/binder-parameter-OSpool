@@ -85,7 +85,7 @@ function evolve_density_matrix_one_trial(L::Int;
     sites = siteinds("Qubit", 2L)
     ρ = MPS(sites, _ -> "Up")
 
-    T_max = 50 * L
+    T_max = 2 * L
 
     # Save state after X noise on final timestep (for Binder calculation)
     ρ_after_X_noise = nothing
@@ -238,7 +238,7 @@ function evolve_density_matrix_one_trial(L::Int;
     sites = siteinds("Qubit", 2L)
     ρ = MPS(sites, _ -> "Up")  # All up state
     
-    T_max = 50 * L  # Time evolution
+    T_max = 2 * L  # Time evolution
     
     # Save state after X noise on final timestep (for Binder calculation)
     ρ_after_X_noise = nothing
@@ -397,7 +397,7 @@ function evolve_density_matrix_one_trial_new(L::Int;
         rng = Random.MersenneTwister(seed)
     end
     
-    T_max = 50 * L
+    T_max = 2 * L
     ρ_after_X_noise = nothing
     
     # --------------------------------------------------
@@ -547,9 +547,10 @@ function ea_binder_density_matrix(L::Int;
     S4s = Vector{Float64}(undef, ntrials)
     Bs  = Vector{Float64}(undef, ntrials)
     
+    # evolve_density_matrix_one_trial_new
     for t in 1:ntrials
-        # Evolve density matrix
-        state, _ = evolve_density_matrix_one_trial_new(L; 
+        # Evolve density matrix - CORRECT VERSION
+        state, _ = evolve_density_matrix_one_trial(L; 
                                                lambda_x=lambda_x, 
                                                lambda_zz=lambda_zz,
                                                P_x=P_x, 

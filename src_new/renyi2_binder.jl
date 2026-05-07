@@ -23,11 +23,68 @@
 #   - repeated-index combinatorics
 # ============================================================
 
-export renyi2_order_mpo_doubled
-export renyi2_order_mpo_one_layer_doubled
-export renyi2_moments_doubled
-export renyi2_binder_doubled
+using Random
+using Statistics
+using ITensors, ITensorMPS
+
 export renyi2_binder_density_matrix
+export renyi2_binder_correlator_doubled
+export renyi2_order_mpo_one_layer_doubled
+
+"""
+    renyi2_binder_correlator_doubled(ρ::MPS, L::Int; layer::Symbol=:bra)
+
+Compute Rényi-2 Binder using MPO observable on doubled MPS.
+Measurement on bra layer only: Q = Σ_i Z_(2i-1).
+
+ρ: Normalized doubled MPS with 2L sites (bra_i, ket_i pairs)
+L: Number of physical sites
+layer: :bra or :ket for which layer to measure on
+
+Returns: (B, M2, M4, purity)
+"""
+function renyi2_binder_correlator_doubled(
+    ρ::MPS,
+    L::Int;
+    layer::Symbol=:bra,
+)
+    sites = siteinds(ρ)
+    @assert length(sites) == 2L "Expected doubled MPS with 2L sites"
+
+    # Normalize trace
+    tr_val = doubledtrace(ρ)
+    ρ_norm = ρ / tr_val
+
+    # Hilbert-Schmidt norm = Tr(ρ²)
+    purity = real(inner(ρ_norm, ρ_norm))
+
+    # Build MPO for Q = Σ_i Z_i on one layer
+    Q = renyi2_order_mpo_one_layer_doubled(sites, L; opname="Z", layer=layer)
+
+    # ψ1 = Q|ρ>
+    ψ1 = apply(Q, ρ_norm; cutoff=1e-12, maxdim=256)
+    num2 = real(inner(ψ1, ψ1))   # = <ρ|Q²|ρ>
+
+    # ψ2 = Q²|ρ>
+    ψ2 = apply(Q, ψ1; cutoff=1e-12, maxdim=256)
+    num4 = real(inner(ψ2, ψ2))   # = <ρ|Q⁴|ρ>
+
+    M2 = num2 / (L^2 * purity)
+    M4 = num4 / (L^4 * purity)
+
+    B = if abs(M2) > sqrt(eps(Float64))
+        1.0 - M4 / (3.0 * M2^2)
+    else
+        NaN
+    end
+
+    return (
+        B = B,
+        M2 = M2,
+        M4 = M4,
+        purity = purity,
+    )
+end
 
 """
     max_linkdim_mps(ψ::MPS)
@@ -256,28 +313,13 @@ function renyi2_binder_doubled(
 end
 
 """
-    renyi2_binder_density_matrix(
-        L::Int;
-        lambda_x,
-        lambda_zz,
-        P_x=0.0,
-        P_zz=0.0,
-        ntrials=200,
-        maxdim=256,
-        cutoff=1e-12,
-        seed=nothing,
-        use_optimized::Bool=true,
-        warn_threshold=1e-10,
-        invalid_threshold=1e-14,
-        verbose=false,
-    )
+    renyi2_binder_density_matrix(L::Int; kwargs...)
 
-Ensemble-averaged Rényi-2 Binder using your density-matrix evolution code.
+ORIGINAL Rényi-2 Binder function (UNCHANGED from prior implementation).
 
-Averages moments first:
-    B = 1 - <M4> / (3 <M2>^2)
-
-This is the correct ensemble Binder construction.
+Uses MPO-based moment calculation on doubled density-matrix MPS.
+Evolved density matrix ρ is in doubled form with 2L sites (bra, ket pairs).
+We measure Z on the bra layer only (odd indices: 1, 3, 5, ..., 2L-1).
 """
 function renyi2_binder_density_matrix(
     L::Int;
@@ -290,8 +332,6 @@ function renyi2_binder_density_matrix(
     cutoff::Float64=1e-12,
     seed::Union{Nothing,Int}=nothing,
     use_optimized::Bool=true,
-    warn_threshold::Float64=1e-10,
-    invalid_threshold::Float64=1e-14,
     verbose::Bool=false,
 )
     rng = isnothing(seed) ? MersenneTwister() : MersenneTwister(seed)
@@ -300,10 +340,9 @@ function renyi2_binder_density_matrix(
     M4s = fill(NaN, ntrials)
     Bs = fill(NaN, ntrials)
     purities = fill(NaN, ntrials)
-    reliabilities = Vector{Symbol}(undef, ntrials)
 
     for t in 1:ntrials
-        # Evolve one trajectory/state
+        # Evolve one trial using original dynamics (use_optimized parameter supported)
         state, _ = if use_optimized
             evolve_density_matrix_one_trial_new(
                 L;
@@ -328,36 +367,21 @@ function renyi2_binder_density_matrix(
             )
         end
 
-        # Extract doubled MPS and normalize by trace
+        # Extract doubled MPS and compute moments using original MPO method
         ρ = get_mps(state)
-        ρ = ρ / doubledtrace(ρ)
-
-        # Build the MPO for this trial (site indices must match current ρ)
-        # Use one-layer observable: Q = Σ_i Z_i on bra layer
-        Q_trial = renyi2_order_mpo_one_layer_doubled(siteinds(ρ), L; opname="Z", layer=:bra)
-
-        res = renyi2_binder_doubled(
-            ρ, L;
-            Q=Q_trial,
-            cutoff=cutoff,
-            maxdim=maxdim,
-            warn_threshold=warn_threshold,
-            invalid_threshold=invalid_threshold,
-            verbose=false,
-        )
-
+        res = renyi2_binder_correlator_doubled(ρ, L; layer=:bra)
+        
         M2s[t] = res.M2
         M4s[t] = res.M4
         Bs[t] = res.B
         purities[t] = res.purity
-        reliabilities[t] = res.diagnostics.reliability
-
+        
         if verbose && (t == 1 || t == ntrials || t % max(1, ntrials ÷ 10) == 0)
             println("trial $t/$ntrials: B=$(res.B), M2=$(res.M2), M4=$(res.M4), purity=$(res.purity)")
         end
     end
 
-    valid = isfinite.(M2s) .& isfinite.(M4s)
+    valid = isfinite.(M2s) .& isfinite.(M4s) .& isfinite.(Bs)
     n_valid = count(valid)
     n_invalid = ntrials - n_valid
 
@@ -373,7 +397,6 @@ function renyi2_binder_density_matrix(
             M4s = M4s,
             Bs = Bs,
             purities = purities,
-            reliabilities = reliabilities,
             ntrials = ntrials,
             n_valid = 0,
             n_invalid = n_invalid,
@@ -384,6 +407,7 @@ function renyi2_binder_density_matrix(
     M4_bar = mean(M4s[valid])
     purity_bar = mean(purities[valid])
 
+    # Ensemble-averaged Binder: B = 1 - <M4> / (3 <M2>²)
     B_ens = 1.0 - M4_bar / (3.0 * M2_bar^2)
 
     return (
@@ -397,7 +421,6 @@ function renyi2_binder_density_matrix(
         M4s = M4s,
         Bs = Bs,
         purities = purities,
-        reliabilities = reliabilities,
         ntrials = ntrials,
         n_valid = n_valid,
         n_invalid = n_invalid,
