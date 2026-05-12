@@ -15,17 +15,17 @@ using Plots
 using LaTeXStrings
 
 function load_results(results_dir)
-    """Load all JSON files from the results directory - only lx0.00_lzz0.30_P*.json files."""
+    """Load all JSON files from the results directory - only lx0.00_lzz0.70_P*.json files."""
     all_data = []
     
-    for L in [8, 10, 12, 14, 16]
+    for L in [8, 16, 24, 32]
         L_dir = joinpath(results_dir, "L$L")
         if !isdir(L_dir)
             continue
         end
         
-        # Only load files matching the pattern: left_boundary_L*_lx0.00_lzz0.30_P*.json
-        json_files = filter(f -> contains(f, "lx0.00_lzz0.30_P") && endswith(f, ".json"), 
+        # Only load files matching the pattern: left_boundary_L*_lx0.00_lzz0.70_P*.json
+        json_files = filter(f -> contains(f, "lx0.00_lzz0.70_P") && endswith(f, ".json"), 
                            readdir(L_dir, join=true))
         
         for file in json_files
@@ -68,11 +68,11 @@ function compute_statistics(df)
 end
 
 function plot_binder_vs_px(stats)
-    """Create plot of Binder parameter vs P for λ_x=0, λ_zz=0.3."""
+    """Create plot of Binder parameter vs P for λ_x=0, λ_zz=0.7."""
     
-    # Should only have one parameter set now (lambda_x=0, lambda_zz=0.3)
+    # Should only have one parameter set now (lambda_x=0, lambda_zz=0.7)
     p1 = plot(xlabel=L"P_x = P_{zz}" * " (dephasing probability)", ylabel="Binder Parameter", 
-              title=L"\lambda_x = 0.0, \lambda_{zz} = 0.3",
+              title=L"\lambda_x = 0.0, \lambda_{zz} = 0.7",
               legend=:topright, grid=true, size=(800, 600), dpi=300)
     
     colors = [:blue, :red, :green, :purple, :orange]
@@ -96,18 +96,29 @@ function plot_binder_vs_px(stats)
     
     hline!(p1, [2/3], linestyle=:dash, color=:black, label="B = 2/3 (pure)", linewidth=2, alpha=0.7)
     
-    savefig(p1, "left_boundary_lx0.0_lzz0.3_binder_vs_p.pdf")
-    savefig(p1, "left_boundary_lx0.0_lzz0.3_binder_vs_p.png")
+    savefig(p1, "1.pdf")
+    savefig(p1, "1.png")
 end
 
 function main()
-    results_dir = "left_boundary_results_20260309_1311"
-    
-    if !isdir(results_dir)
+    # Find the most recent results directory
+    results_dirs = filter(d -> startswith(d, "left_boundary_results_") && isdir(d), readdir())
+    if isempty(results_dirs)
+        println("ERROR: No results directory found matching 'left_boundary_results_*'")
         return
     end
     
+    results_dir = last(sort(results_dirs))  # Get most recent by timestamp
+    println("Loading results from: $results_dir")
+    
     df = load_results(results_dir)
+    
+    if nrow(df) == 0
+        println("ERROR: No data loaded. Check that results directory contains lx0.00_lzz0.70_P*.json files")
+        return
+    end
+    
+    println("Loaded $(nrow(df)) data points")
     stats = compute_statistics(df)
     plot_binder_vs_px(stats)
 end

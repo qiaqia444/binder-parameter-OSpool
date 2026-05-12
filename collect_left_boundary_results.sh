@@ -14,7 +14,7 @@ echo "Creating results directory: $RESULTS_DIR"
 mkdir -p "$RESULTS_DIR"
 
 # Create subdirectories for each system size
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     mkdir -p "$RESULTS_DIR/L${L}"
 done
 
@@ -31,7 +31,7 @@ echo "Found output directory with $(ls output/*.json 2>/dev/null | wc -l) result
 
 # Organize by system size (collect ALL lzz0.70 files, no time filter)
 echo "Collecting ALL λ_x=0.0, λ_zz=0.7 files..."
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     # Collect all files matching pattern (no -mtime filter)
     find output -name "left_boundary_L${L}_lx0.00_lzz0.70_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)

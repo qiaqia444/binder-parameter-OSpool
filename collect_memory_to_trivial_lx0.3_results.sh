@@ -14,7 +14,7 @@ echo "Creating results directory: $RESULTS_DIR"
 mkdir -p "$RESULTS_DIR"
 
 # Create subdirectories for each system size
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     mkdir -p "$RESULTS_DIR/L${L}"
 done
 
@@ -45,7 +45,7 @@ echo "✓ Found output files with corrected parameters (λ_x=$EXPECTED_LAMBDA_X,
 
 # Organize by system size (collect ALL lx0.21 lzz0.49 files, no time filter)
 echo "Collecting ALL λ_x=$EXPECTED_LAMBDA_X, λ_zz=$EXPECTED_LAMBDA_ZZ files..."
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     # Collect all files matching pattern (no -mtime filter)
     find output -name "memory_to_trivial_L${L}_lx0.21_lzz0.49_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
@@ -95,7 +95,7 @@ if [ $total_count -gt 0 ]; then
 fi
 
 # Check if collection is complete
-expected_total=2200  # Should have 2200 parameter sets
+expected_total=2560  # Should have 2560 parameter sets (4 L × 16 P × 40 samples)
 if [ $total_count -lt $expected_total ]; then
     missing=$((expected_total - total_count))
     echo "⏳ Incomplete collection: $missing/$expected_total files still missing"
@@ -117,7 +117,7 @@ echo "=== Collection Summary ==="
 echo "Results directory: $RESULTS_DIR"
 echo "Archive: ${RESULTS_DIR}.tar.gz"
 echo "Archive size: $ARCHIVE_SIZE"
-echo "Total files collected: $total_count / 2200 (expected)"
+echo "Total files collected: $total_count / 2560 (expected)"
 echo "Failed jobs: $failure_count"
 echo "Parameters: λ_x = 0.21 (X measurements), λ_zz = 0.49 (ZZ measurements)"
 echo "Timeout per trial: 24 hours (86400 seconds)"
@@ -125,7 +125,7 @@ echo ""
 
 # Per-system-size breakdown
 echo "=== Files by System Size ==="
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     count=$(find "$RESULTS_DIR/L${L}" -name "*.json" 2>/dev/null | wc -l)
     printf "  L=%-2d: %3d files\n" $L $count
 done
