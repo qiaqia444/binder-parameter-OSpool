@@ -184,7 +184,7 @@ function main()
             maxdim = maxdim,
             cutoff = cutoff,
             seed = seed + i,  # Different seed for each P
-            use_optimized = true
+            use_optimized = false
         )
         
         t_elapsed = time() - t_start
