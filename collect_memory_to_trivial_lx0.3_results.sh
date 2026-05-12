@@ -95,7 +95,7 @@ if [ $total_count -gt 0 ]; then
 fi
 
 # Check if collection is complete
-expected_total=2560  # Should have 2560 parameter sets (4 L × 16 P × 40 samples)
+expected_total=3200  # Should have 3200 parameter sets (4 L × 20 P × 40 samples)
 if [ $total_count -lt $expected_total ]; then
     missing=$((expected_total - total_count))
     echo "⏳ Incomplete collection: $missing/$expected_total files still missing"
@@ -117,7 +117,7 @@ echo "=== Collection Summary ==="
 echo "Results directory: $RESULTS_DIR"
 echo "Archive: ${RESULTS_DIR}.tar.gz"
 echo "Archive size: $ARCHIVE_SIZE"
-echo "Total files collected: $total_count / 2560 (expected)"
+echo "Total files collected: $total_count / 3200 (expected)"
 echo "Failed jobs: $failure_count"
 echo "Parameters: λ_x = 0.21 (X measurements), λ_zz = 0.49 (ZZ measurements)"
 echo "Timeout per trial: 24 hours (86400 seconds)"
