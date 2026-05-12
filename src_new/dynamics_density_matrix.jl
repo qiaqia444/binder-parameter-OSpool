@@ -547,17 +547,29 @@ function ea_binder_density_matrix(L::Int;
     S4s = Vector{Float64}(undef, ntrials)
     Bs  = Vector{Float64}(undef, ntrials)
     
-    # evolve_density_matrix_one_trial_new
+    # Use version based on use_optimized parameter
     for t in 1:ntrials
-        # Evolve density matrix - CORRECT VERSION
-        state, _ = evolve_density_matrix_one_trial(L; 
-                                               lambda_x=lambda_x, 
-                                               lambda_zz=lambda_zz,
-                                               P_x=P_x, 
-                                               P_zz=P_zz,
-                                               maxdim=maxdim, 
-                                               cutoff=cutoff, 
-                                               rng=rng)
+        # Evolve density matrix
+        if use_optimized
+            state, _ = evolve_density_matrix_one_trial_new(L; 
+                                                       lambda_x=lambda_x, 
+                                                       lambda_zz=lambda_zz,
+                                                       P_x=P_x, 
+                                                       P_zz=P_zz,
+                                                       maxdim=maxdim, 
+                                                       cutoff=cutoff, 
+                                                       rng=rng,
+                                                       seed=nothing)
+        else
+            state, _ = evolve_density_matrix_one_trial(L; 
+                                                   lambda_x=lambda_x, 
+                                                   lambda_zz=lambda_zz,
+                                                   P_x=P_x, 
+                                                   P_zz=P_zz,
+                                                   maxdim=maxdim, 
+                                                   cutoff=cutoff, 
+                                                   rng=rng)
+        end
         
         # Extract MPS and normalize by trace (not HS norm)
         ρ = get_mps(state)

@@ -178,7 +178,8 @@ function main()
             ntrials = ntrials,
             maxdim = maxdim,
             cutoff = cutoff,
-            seed = seed + i  # Different seed for each P
+            seed = seed + i,  # Different seed for each P
+            use_optimized = true
         )
         
         t_elapsed = time() - t_start
