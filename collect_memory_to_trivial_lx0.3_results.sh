@@ -43,11 +43,11 @@ fi
 
 echo "✓ Found output files with corrected parameters (λ_x=$EXPECTED_LAMBDA_X, λ_zz=$EXPECTED_LAMBDA_ZZ)"
 
-# Organize by system size (collect ALL lx0.21 lzz0.49 files, no time filter)
-echo "Collecting ALL λ_x=$EXPECTED_LAMBDA_X, λ_zz=$EXPECTED_LAMBDA_ZZ files..."
+# Organize by system size (collect ALL memory_to_trivial_L_P files, no time filter)
+echo "Collecting ALL memory_to_trivial_L*_P*.json files..."
 for L in 8 16 24 32; do
-    # Collect all files matching pattern (no -mtime filter)
-    find output -name "memory_to_trivial_L${L}_lx0.21_lzz0.49_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
+    # Collect all files matching pattern: memory_to_trivial_L{L}_P*.json (no -mtime filter)
+    find output -name "memory_to_trivial_L${L}_P*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
     if [ $count -gt 0 ]; then
         echo "  L=$L: $count files collected"

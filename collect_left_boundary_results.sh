@@ -29,11 +29,11 @@ fi
 
 echo "Found output directory with $(ls output/*.json 2>/dev/null | wc -l) result files"
 
-# Organize by system size (collect ALL lzz0.70 files, no time filter)
-echo "Collecting ALL λ_x=0.0, λ_zz=0.7 files..."
+# Organize by system size (collect ALL left_L_P files, no time filter)
+echo "Collecting ALL left_L*_P*.json files..."
 for L in 8 16 24 32; do
-    # Collect all files matching pattern (no -mtime filter)
-    find output -name "left_boundary_L${L}_lx0.00_lzz0.70_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
+    # Collect all files matching pattern: left_L{L}_P*.json (no -mtime filter)
+    find output -name "left_L${L}_P*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
     echo "  L=$L: $count files"
 done
