@@ -20,7 +20,7 @@ function load_results(results_dir)
     """Load all JSON files from the results directory - only lx0.70_lzz0.00_P*.json files."""
     all_data = []
     
-    for L in [8, 10, 12, 14, 16]
+    for L in [8, 16, 24, 32]
         L_dir = joinpath(results_dir, "L$L")
         if !isdir(L_dir)
             continue

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # HTCondor job script for right boundary scan
-# Density matrix evolution with Rényi-2 Binder focus
+# Proposal-aligned doubled-MPS Born sampling, Rényi-2 Binder focus
 
 # Get individual arguments from HTCondor
 L=$1
@@ -39,28 +39,12 @@ export BLAS_NUM_THREADS=4
 
 echo "Threading enabled: JULIA_NUM_THREADS=$JULIA_NUM_THREADS"
 
-# CRITICAL: Ensure src_new directory is accessible
-echo "Setting up module accessibility..."
-if [ ! -d "src_new" ]; then
-    if [ -d "../src_new" ]; then
-        echo "Creating symlink: ln -s ../src_new src_new"
-        ln -s ../src_new src_new
-        echo "✓ Symlink created"
-    else
-        echo "✗ ERROR: src_new directory not found in current or parent directory!"
-        echo "Cannot proceed without src_new modules"
-        exit 1
-    fi
-else
-    echo "✓ src_new directory already present"
-fi
-
 # Install packages
 echo "Setting up Julia environment..."
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-# Run right boundary scan simulation (Rényi-2 Binder)
-echo "Running right boundary scan with density matrix evolution (Rényi-2 Binder)..."
+# Run right boundary scan simulation (proposal-aligned Rényi-2 Binder)
+echo "Running right boundary scan with doubled-MPS Born sampling (Rényi-2 Binder)..."
 echo "Command: julia --project=. run_right_boundary_scan.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --P_min $P_x --P_max $P_x --P_steps 1 --ntrials $ntrials --seed $seed --output_dir output --output_file ${out_prefix}.json"
 
 julia --project=. run_right_boundary_scan.jl \

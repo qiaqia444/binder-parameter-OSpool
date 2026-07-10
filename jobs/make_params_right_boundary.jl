@@ -6,12 +6,13 @@ Explores measurement-induced phase transition with Rényi-2 Binder
 
 Scans: P_x from 0 to 0.5 (X dephasing)
 Fixed: λ_x = 0.7 (X measurement strength), λ_zz = 0.0 (no ZZ measurements)
+Equal dephasing: P_x = P_zz
 """
 
 using Printf
 
 # System sizes (multiple L for finite-size scaling)
-L_values = [8, 10, 12, 14, 16]
+L_values = [8, 16, 24, 32]
 
 # Fixed measurement strengths
 lambda_x = 0.7   # X measurement strength
@@ -39,9 +40,9 @@ open("params_right_boundary.txt", "w") do f
     for L in L_values
         for P in P_values
             for sample in 1:n_samples
-                # P_x only (no ZZ dephasing)
+                # P_x = P_zz (equal dephasing)
                 P_x = P
-                P_zz = 0.0
+                P_zz = P
                 
                 out_prefix = @sprintf("right_boundary_L%d_lx%.2f_lzz%.2f_Px%.2f_s%d", 
                                      L, lambda_x, lambda_zz, P_x, sample)

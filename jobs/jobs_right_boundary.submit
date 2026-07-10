@@ -5,8 +5,8 @@ universe              = vanilla
 executable            = run_right_boundary.sh
 arguments             = $(L) $(lambda_x) $(lambda_zz) $(P_x) $(P_zz) $(ntrials) $(seed) $(sample) $(out_prefix)
 
-# Send only what the job needs (same as left_boundary)
-transfer_input_files  = ../src_new, ../Project.toml, ../Manifest.toml, ../run_right_boundary_scan.jl
+# Send only what the job needs
+transfer_input_files  = ../Project.toml, ../Manifest.toml, ../renyi2_right_boundary_core.jl, ../run_right_boundary_scan.jl
 
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT

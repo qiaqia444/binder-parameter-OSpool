@@ -1,84 +1,87 @@
 #!/usr/bin/env julia
 
 """
-Right Boundary Scan - Rényi-2 Binder Focus
+Right Boundary Scan - Rényi-2 Binder Focus (local convenience script)
 
-Scan P_x at fixed λ_x = 0.7, λ_zz = 0
-Focus on measurement-induced entanglement transition using Rényi-2 Binder
+Scan q = P_x = P_zz at fixed λ_x = 0.7, λ_zz = 0.
+Focus on measurement-induced entanglement transition using the proposal-aligned
+Rényi-2 Binder.
+
+Physics is the doubled-MPS Born-sampling model validated in
+`right_boundary_renyi2_proposal_aligned_v4.ipynb`, shared with the cluster
+entry point `run_right_boundary_scan.jl` via `renyi2_right_boundary_core.jl`.
 """
 
 using Dates
 using JSON
-using Random
 using Statistics
-using ITensors, ITensorMPS
-using LinearAlgebra
 
-# Load modules
-include("src_new/types.jl")
-include("src_new/channels.jl")
-include("src_new/dynamics_density_matrix.jl")
-include("src_new/renyi2_dynamics_density_matrix_1.jl")
+include("renyi2_right_boundary_core.jl")
 
 # === EDIT THESE PARAMETERS ===
 L = 8                    # System size
 lambda_x = 0.7          # X measurement strength (FIXED)
-lambda_zz = 0.0         # ZZ measurement strength (FIXED - no ZZ)
-P_steps = 11            # Number of P values
-P_min = 0.0             # Minimum P_x
-P_max = 0.5             # Maximum P_x
-P_zz_mode = "zero"      # Always zero for this boundary
+lambda_zz = 0.0         # ZZ measurement strength (FIXED - no weak ZZ measurement)
+P_steps = 11            # Number of q values
+P_min = 0.0             # Minimum q
+P_max = 0.5             # Maximum q
 
-ntrials = 500           # Monte Carlo trajectories
-maxdim = 256            # Max bond dimension
+ntrials = 500           # Born-sampled Monte Carlo trajectories
+maxdim = 256            # Max bond dimension (dynamics)
+cutoff = 1e-12          # SVD truncation cutoff (dynamics)
+T_max_factor = 4        # T_max = T_max_factor * L
+obs_maxdim_factor = 4   # Observable maxdim = obs_maxdim_factor * maxdim
+obs_cutoff = 1e-14      # SVD truncation cutoff (observable)
+nboot = 1000            # Bootstrap resamples for B standard error
 seed = 42               # Random seed
 output_dir = "right_boundary_results"
 # =============================
 
+@assert isapprox(lambda_x, 0.7; atol=1e-9) "Proposal-aligned right edge requires lambda_x = 0.7."
+@assert isapprox(lambda_zz, 0.0; atol=1e-9) "Proposal-aligned right edge requires lambda_zz = 0."
+
 println("="^70)
 println("RIGHT BOUNDARY SCAN: Rényi-2 Binder Analysis")
 println("="^70)
-println("Physics: Measurement-induced transition (λ_x = 0.7)")
+println("Physics: Measurement-induced transition (λ_x = 0.7, λ_zz = 0, q_x=q_zz=q)")
 println()
 println("Parameters:")
 println("  L = $L")
 println("  λ_x = $lambda_x (X measurement strength - FIXED)")
-println("  λ_zz = $lambda_zz (no ZZ measurements)")
-println("  P_x scan: [$P_min, $P_max] with $P_steps points")
-println("  P_zz = 0 (no ZZ dephasing)")
+println("  λ_zz = $lambda_zz (no weak ZZ measurements)")
+println("  q scan: [$P_min, $P_max] with $P_steps points (q_x = q_zz = q)")
 println("  Trajectories per point: $ntrials")
-println("  Focus: Rényi-2 Binder (M2, M4 moments)")
+println("  T_max = $T_max_factor * L = $(T_max_factor * L)")
+println("  Focus: proposal-aligned, trajectory-averaged Rényi-2 Binder")
 println("="^70)
 println()
 
 # Create output directory
 mkpath(output_dir)
 
-# Create P values
-P_values = range(P_min, P_max, length=P_steps)
+# Create q values
+P_values = P_steps <= 1 ? [P_min] : range(P_min, P_max, length=P_steps)
 
 results = []
 
-for (i, P_x) in enumerate(P_values)
-    P_zz = 0.0  # Always zero for right boundary
-    
-    println("\n[$i/$P_steps] P_x = $(round(P_x, digits=3))")
+for (i, q) in enumerate(P_values)
+    println("\n[$i/$P_steps] q = $(round(q, digits=4)) (P_x = P_zz = q)")
     println("-"^70)
     
     t_start = time()
     
-    result = renyi2_binder_density_matrix(
-        L;
+    result = rb_run_right_edge_point(
+        L, Float64(q);
         lambda_x = lambda_x,
         lambda_zz = lambda_zz,
-        P_x = P_x,
-        P_zz = P_zz,
         ntrials = ntrials,
+        T_max = T_max_factor * L,
         maxdim = maxdim,
-        cutoff = 1e-12,
+        cutoff = cutoff,
+        obs_maxdim = obs_maxdim_factor * maxdim,
+        obs_cutoff = obs_cutoff,
         seed = seed + i,
-        use_optimized = true,
-        verbose = false
+        nboot = nboot,
     )
     
     t_elapsed = time() - t_start
@@ -88,25 +91,30 @@ for (i, P_x) in enumerate(P_values)
         "L" => L,
         "lambda_x" => lambda_x,
         "lambda_zz" => lambda_zz,
-        "P_x" => P_x,
-        "P_zz" => P_zz,
+        "P_x" => q,
+        "P_zz" => q,
         "B" => result.B,
         "B_mean_of_trials" => result.B_mean_of_trials,
         "B_std_of_trials" => result.B_std_of_trials,
         "M2_bar" => result.M2_bar,
         "M4_bar" => result.M4_bar,
         "purity_bar" => result.purity_bar,
+        "B_bootstrap_se" => result.B_bootstrap_se,
+        "B_ci_low" => result.B_ci_low,
+        "B_ci_high" => result.B_ci_high,
+        "B2_ratio_of_mean_moments" => result.B2_ratio_of_mean_moments,
         "ntrials" => result.ntrials,
         "n_valid" => result.n_valid,
         "n_invalid" => result.n_invalid,
+        "max_interphysical_linkdim" => result.max_interphysical_linkdim,
+        "max_trace_error" => result.max_trace_error,
         "time_seconds" => t_elapsed
     )
     
     push!(results, result_dict)
     
     # Print results
-    println("  B (ensemble) = $(round(result.B, digits=4))")
-    println("  B (mean of trials) = $(round(result.B_mean_of_trials, digits=4)) ± $(round(result.B_std_of_trials, digits=4))")
+    println("  B (proposal, trajectory-averaged) = $(round(result.B, digits=4)) ± $(round(result.B_bootstrap_se, digits=4)) (bootstrap SE)")
     println("  M2_bar = $(round(result.M2_bar, digits=4))")
     println("  M4_bar = $(round(result.M4_bar, digits=4))")
     println("  Purity = $(round(result.purity_bar, digits=4))")
