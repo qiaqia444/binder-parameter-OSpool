@@ -11,7 +11,7 @@ Fixed: λ_x = 0.49 (X measurements), λ_zz = 0.21 (ZZ measurements)
 using Printf
 
 # System sizes (multiple L for finite-size scaling)
-L_values = [8, 10, 12, 14, 16]
+L_values = [8, 16, 24, 32]
 
 # Fixed measurement strengths (lambda=0.7 family)
 lambda_x = 0.49   # X measurement strength

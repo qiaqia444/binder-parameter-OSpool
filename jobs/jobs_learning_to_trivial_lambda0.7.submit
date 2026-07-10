@@ -6,7 +6,7 @@ executable            = run_learning_to_trivial_lambda0.7.sh
 arguments             = $(L) $(lambda_x) $(lambda_zz) $(P_x) $(P_zz) $(ntrials) $(seed) $(sample) $(out_prefix)
 
 # Send only what the job needs
-transfer_input_files  = ../src_new, ../Project.toml, ../Manifest.toml, ../run_learning_to_trivial_lambda0.7_scan.jl
+transfer_input_files  = ../Project.toml, ../Manifest.toml, ../renyi2_learning_to_trivial_lambda0.7_core.jl, ../run_learning_to_trivial_lambda0.7_scan.jl
 
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT

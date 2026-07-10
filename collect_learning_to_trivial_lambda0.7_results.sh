@@ -14,7 +14,7 @@ echo "Creating results directory: $RESULTS_DIR"
 mkdir -p "$RESULTS_DIR"
 
 # Create subdirectories for each system size
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     mkdir -p "$RESULTS_DIR/L${L}"
 done
 
@@ -45,7 +45,7 @@ echo "✓ Found output files with corrected parameters (λ_x=$EXPECTED_LAMBDA_X,
 
 # Organize by system size (collect ALL lx0.49 lzz0.21 files)
 echo "Collecting ALL λ_x=$EXPECTED_LAMBDA_X, λ_zz=$EXPECTED_LAMBDA_ZZ files..."
-for L in 8 10 12 14 16; do
+for L in 8 16 24 32; do
     # Collect all files matching pattern (no -mtime filter)
     find output -name "learning_to_trivial_lambda0.7_L${L}_lx0.49_lzz0.21_*.json" ! -name "*FAILED*" -exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
     count=$(ls "../${RESULTS_DIR}/L${L}/"*.json 2>/dev/null | wc -l)
