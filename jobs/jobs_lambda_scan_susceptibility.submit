@@ -1,0 +1,33 @@
+# HTCondor submit file for Lambda-Path Scan (Rényi-2 / Edwards-Anderson
+# overlap susceptibilities, ITensorCorrelators.jl)
+# Sweeps lambda_x = delta*lambda, lambda_zz = delta*(1-lambda) at fixed q
+
+universe              = vanilla
+executable            = run_lambda_scan_susceptibility.sh
+arguments             = $(L) $(lambda) $(delta) $(q) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs
+transfer_input_files  = ../Project.toml, ../Manifest.toml, ../lambda_scan_susceptibilities_itensorcorrelators.jl, ../run_lambda_scan_susceptibility_scan.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/lambda_scan_susceptibility_L$(L)_lambda$(lambda)_s$(sample).out
+error                 = logs/lambda_scan_susceptibility_L$(L)_lambda$(lambda)_s$(sample).err
+log                   = logs/lambda_scan_susceptibility_condor.log
+
++JobDurationCategory = "Long"
+
+# Resources (density matrices need more memory than pure states)
+# T_max = 2L with multi-threading (4 CPUs)
+request_cpus          = 4
+request_memory        = 8GB
+request_disk          = 8 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# One job per line in params_lambda_scan_susceptibility.txt
+queue L lambda delta q ntrials seed sample out_prefix from params_lambda_scan_susceptibility.txt
