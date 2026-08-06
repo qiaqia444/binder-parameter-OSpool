@@ -17,36 +17,74 @@ using Plots
 using LaTeXStrings
 
 function load_results(results_dir)
-    """Load all JSON files from the results directory - only lx0.70_lzz0.00_P*.json files."""
-    all_data = []
-    
-    for L in [8, 16, 24, 32]
+    """Load JSON files and tolerate files with different schemas."""
+
+    rows = Dict{String,Any}[]
+
+    for L in [8, 16, 24, 32, 40]
         L_dir = joinpath(results_dir, "L$L")
+
         if !isdir(L_dir)
             continue
         end
-        
-        # Only load files matching the pattern: right_boundary_L*_lx0.70_lzz0.00_P*.json
-        json_files = filter(f -> contains(f, "lx0.70_lzz0.00_P") && endswith(f, ".json"), 
-                           readdir(L_dir, join=true))
-        
+
+        json_files = filter(
+            f -> contains(f, "lx0.70_lzz0.00_P") &&
+                 endswith(f, ".json"),
+            readdir(L_dir, join=true),
+        )
+
         for file in json_files
             try
-                data = JSON.parsefile(file)
-                if data isa Array
-                    for entry in data
-                        push!(all_data, entry)
+                parsed = JSON.parsefile(file)
+                entries = parsed isa AbstractVector ? parsed : [parsed]
+
+                for entry in entries
+                    if !(entry isa AbstractDict)
+                        @warn "Skipping non-dictionary JSON entry" file
+                        continue
                     end
-                else
-                    push!(all_data, data)
+
+                    row = Dict{String,Any}(
+                        String(key) => value
+                        for (key, value) in entry
+                    )
+
+                    # Helpful for finding where every row came from.
+                    row["_source_file"] = file
+
+                    push!(rows, row)
                 end
+
             catch e
-                # Skip failed files silently
+                @warn(
+                    "Could not read JSON file",
+                    file=file,
+                    exception=(e, catch_backtrace()),
+                )
             end
         end
     end
-    
-    return DataFrame(all_data)
+
+    isempty(rows) && return DataFrame()
+
+    # Construct the union of all keys.
+    all_keys = Set{String}()
+
+    for row in rows
+        union!(all_keys, keys(row))
+    end
+
+    # Insert `missing` wherever an older JSON lacks a newer field.
+    for row in rows
+        for key in all_keys
+            if !haskey(row, key)
+                row[key] = missing
+            end
+        end
+    end
+
+    return DataFrame(rows)
 end
 
 function compute_statistics(df)
@@ -74,9 +112,9 @@ function plot_renyi2_binder_vs_px(stats)
     """Create plot of Rényi-2 Binder parameter vs P for λ_x=0.7, λ_zz=0."""
     
     # Should only have one parameter set now (lambda_x=0.7, lambda_zz=0.0)
-    p1 = plot(xlabel=L"P_x" * " (X dephasing probability)", ylabel=L"B_R^2 \text{ (Rényi-2 Binder)}", 
+    p1 = plot(xlabel=L"P_{x} = P_{zz}", ylabel="Binder Parameter (Rényi-2)", 
               title=L"\lambda_x = 0.7, \lambda_{zz} = 0.0",
-              legend=:topright, grid=true, size=(800, 600), dpi=300)
+              legend=:outertopright, grid=true, size=(800, 600), dpi=300)
     
     colors = [:blue, :red, :green, :purple, :orange]
     markers = [:circle, :square, :diamond, :utriangle, :dtriangle]
@@ -93,8 +131,7 @@ function plot_renyi2_binder_vs_px(stats)
               linewidth=2)
     end
     
-    hline!(p1, [2/3], linestyle=:dash, color=:black, label=L"B_R^2 = 2/3 \text{ (pure)}", linewidth=2, alpha=0.7)
-    hline!(p1, [0], linestyle=:dot, color=:black, label=L"B_R^2 = 0 \text{ (disordered)}", linewidth=1.5, alpha=0.5)
+    hline!(p1, [2/3], linestyle=:dash, color=:black, label="B = 2/3", linewidth=2, alpha=0.7)
     
     savefig(p1, "right_boundary_lx0.7_lzz0.0_renyi2_binder_vs_px.pdf")
     savefig(p1, "right_boundary_lx0.7_lzz0.0_renyi2_binder_vs_px.png")
@@ -105,7 +142,7 @@ function plot_moments_vs_px(stats)
     
     p2 = plot(xlabel=L"P_x" * " (X dephasing probability)", ylabel=L"M_2", 
               title=L"M_2 \text{ vs } P_x \text{ (λ_x=0.7, λ_zz=0.0)}",
-              legend=:topright, grid=true, size=(800, 600), dpi=300)
+              legend=:outertopright, grid=true, size=(800, 600), dpi=300)
     
     colors = [:blue, :red, :green, :purple, :orange]
     markers = [:circle, :square, :diamond, :utriangle, :dtriangle]
@@ -126,7 +163,7 @@ function plot_moments_vs_px(stats)
     # M4 plot
     p3 = plot(xlabel=L"P_x" * " (X dephasing probability)", ylabel=L"M_4", 
               title=L"M_4 \text{ vs } P_x \text{ (λ_x=0.7, λ_zz=0.0)}",
-              legend=:topright, grid=true, size=(800, 600), dpi=300)
+              legend=:outertopright, grid=true, size=(800, 600), dpi=300)
     
     for (idx, L) in enumerate(sort(unique(stats.L)))
         L_data = filter(row -> row.L == L, stats)
