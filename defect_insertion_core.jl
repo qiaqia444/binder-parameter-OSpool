@@ -158,10 +158,35 @@ using ITensorMPS
 
 include("renyi2_right_boundary_susceptibility_core.jl")
 
-const DEFECT_INSERTION_PAIRS = Dict(
-    16 => [(4, 12), (5, 13)],
-    24 => [(6, 18), (7, 19)],
-    32 => [(8, 24), (9, 25)],
+"""
+    DISORDER_STRING_PAIRS[L][r]
+
+For each system size L, a Dict mapping separation r to two translated
+endpoint pairs (i,j) with |i-j| = r, used to measure the r-dependence
+(and, for r = L/2, comparability with the earlier single-length pairs).
+The two pairs at each r are translated copies within the SAME
+trajectory (not independent disorder samples): average them within a
+trajectory before computing error bars across trajectories.
+"""
+const DISORDER_STRING_PAIRS = Dict(
+    16 => Dict(
+        2 => [(4, 6),  (5, 7)],
+        4 => [(4, 8),  (5, 9)],
+        6 => [(4, 10), (5, 11)],
+        8 => [(4, 12), (5, 13)],
+    ),
+    24 => Dict(
+        3  => [(6, 9),  (7, 10)],
+        6  => [(6, 12), (7, 13)],
+        9  => [(6, 15), (7, 16)],
+        12 => [(6, 18), (7, 19)],
+    ),
+    32 => Dict(
+        4  => [(8, 12), (9, 13)],
+        8  => [(8, 16), (9, 17)],
+        12 => [(8, 20), (9, 21)],
+        16 => [(8, 24), (9, 25)],
+    ),
 )
 
 function defect_insertion_record_checksum(record::AbstractVector{<:Integer})
@@ -291,78 +316,65 @@ function defect_insertion_apply_domain_wall(
 end
 
 # ============================================================
-# Z_m^(0) and Z_m^(ij) for the same, unmodified rho_m.
+# R_{ij} = zij/z0 for the same, unmodified rho_m -- a signed Renyi-2
+# disorder-string overlap, not a partition-function ratio (see module
+# docstring). No trajectory is ever discarded and R is never clipped or
+# replaced by |R|.
 # ============================================================
-function defect_insertion_logZ0(rho::MPS)
-    z0 = real(inner(rho, rho))
-    @assert isfinite(z0) && z0 > 0 "Non-positive baseline partition function: $z0"
-    return log(z0)
-end
+
+"""
+Absolute threshold on |R| below which R is classified as numerically
+zero (`is_numerical_zero = true`, `string_log_magnitude = Inf`). This is
+a fixed, documented convention, not an arbitrary positive floor: R is
+never altered, only classified.
+"""
+const DEFECT_INSERTION_ZERO_ATOL = 1e-12
 
 """
     defect_insertion_contract_pair(rho, sites, i, j; maxdim, cutoff)
 
-Compute logZ0 = log Tr[rho^2], logZij = log <<rho | D_ij | rho>> (via the
-domain-wall string D_{i,j} = prod_{p=i}^{j-1} X_p^bra), logR = logZij -
-logZ0, and deltaF = -logR, for the SAME `rho` used for both
-contractions. `rho` is never mutated (`apply` returns a new MPS). If
-i == j, the segment is empty (D_ii = Identity), so the defect network is
-identical to B_0 by construction (deltaF = 0 exactly, no contraction is
-performed).
+Compute z0 = Tr[rho^2], zij = <<rho | D_ij | rho>> (via the disorder
+string D_{i,j} = prod_{p=i}^{j-1} X_p^bra), and the SIGNED overlap
+R = zij/z0, for the SAME `rho` used for both contractions. `rho` is
+never mutated (`apply` returns a new MPS). If i == j, D_ii = Identity
+exactly (empty segment), so R_ii = 1 exactly, with no contraction
+performed. R is never discarded, clipped, or replaced by |R|; a
+numerically-zero R is flagged via `is_numerical_zero` and reported with
+`string_log_magnitude = Inf` rather than NaN.
 """
 function defect_insertion_contract_pair(
     rho::MPS, sites, i::Int, j::Int; maxdim::Int, cutoff::Float64,
 )
-    logZ0 = defect_insertion_logZ0(rho)
+    z0_complex = inner(rho, rho)
+    contraction_error_z0 = abs(imag(z0_complex)) / max(abs(z0_complex), eps())
+    z0 = real(z0_complex)
+    @assert isfinite(z0) && z0 > 0 "Non-positive/non-finite z0 = Tr[rho^2]: $z0"
 
     if i == j
         return (
-            logZ0=logZ0, logZij=logZ0, logR=0.0, deltaF=0.0,
-            z_ij_raw=exp(logZ0), contraction_error=0.0,
+            i=i, j=j, r=0, z0=z0, zij=z0, R=1.0, absR=1.0, signR=1.0,
+            string_log_magnitude=0.0, is_numerical_zero=false,
+            contraction_error=contraction_error_z0,
         )
     end
 
     flipped = defect_insertion_apply_domain_wall(rho, sites, i, j; maxdim=maxdim, cutoff=cutoff)
     zij_complex = inner(rho, flipped)
-    contraction_error = abs(imag(zij_complex)) / max(abs(zij_complex), eps())
+    contraction_error = max(
+        contraction_error_z0,
+        abs(imag(zij_complex)) / max(abs(zij_complex), eps()),
+    )
     zij = real(zij_complex)
 
-    if isfinite(zij) && zij > 0
-        logZij = log(zij)
-        logR = logZij - logZ0
-        deltaF = -logR
-    else
-        logZij = NaN
-        logR = NaN
-        deltaF = NaN
-    end
+    R = zij / z0
+    absR = abs(R)
+    is_zero = absR <= DEFECT_INSERTION_ZERO_ATOL
+    signR = is_zero ? 0.0 : sign(R)
+    string_log_magnitude = is_zero ? Inf : -log(absR)
 
     return (
-        logZ0=logZ0, logZij=logZij, logR=logR, deltaF=deltaF,
-        z_ij_raw=zij, contraction_error=contraction_error,
+        i=i, j=j, r=abs(i - j), z0=z0, zij=zij, R=R, absR=absR, signR=signR,
+        string_log_magnitude=string_log_magnitude, is_numerical_zero=is_zero,
+        contraction_error=contraction_error,
     )
-end
-
-function defect_insertion_compute_trajectory(
-    evolved, L::Int, pairs; maxdim::Int, cutoff::Float64,
-)
-    rows = NamedTuple[]
-
-    for (i, j) in pairs
-        value = defect_insertion_contract_pair(
-            evolved.rho, evolved.sites, i, j; maxdim=maxdim, cutoff=cutoff,
-        )
-        push!(rows, (
-            i=i, j=j, r=abs(i - j),
-            logZ0=value.logZ0, logZij=value.logZij, logR=value.logR,
-            deltaF=value.deltaF, z_ij_raw=value.z_ij_raw,
-            contraction_error=value.contraction_error,
-            record_checksum=evolved.record_checksum,
-        ))
-    end
-
-    finite_deltaF = filter(isfinite, [row.deltaF for row in rows])
-    average_deltaF = isempty(finite_deltaF) ? NaN : sum(finite_deltaF) / length(rows)
-
-    return (rows=rows, average_deltaF=average_deltaF)
 end

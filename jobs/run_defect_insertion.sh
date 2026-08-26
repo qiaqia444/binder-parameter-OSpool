@@ -36,7 +36,7 @@ echo "Setting up Julia environment..."
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
 echo "Running right-boundary defect-insertion diagnostic..."
-echo "Command: julia --project=. defect_insertion_run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --P $P_x --ntrials $ntrials --seed $seed --output_dir output --output_file ${out_prefix}.json"
+echo "Command: julia --project=. defect_insertion_run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --P $P_x --ntrials $ntrials --seed $seed --output_dir output --output_file ${out_prefix}.csv"
 
 julia --project=. defect_insertion_run.jl \
     --L "$L" \
@@ -46,7 +46,7 @@ julia --project=. defect_insertion_run.jl \
     --ntrials "$ntrials" \
     --seed "$seed" \
     --output_dir output \
-    --output_file "${out_prefix}.json"
+    --output_file "${out_prefix}.csv"
 
 exit_code=$?
 echo "Job completed with exit code: $exit_code"

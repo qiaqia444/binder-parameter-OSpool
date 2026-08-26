@@ -21,18 +21,17 @@ if [ ! -d "output" ]; then
 	exit 1
 fi
 
-echo "Found $(find output -maxdepth 1 -name '*.json' | wc -l) result files"
+echo "Found $(find output -maxdepth 1 -name '*.csv' | wc -l) result files"
 for L in 16 24 32; do
 	find output -maxdepth 1 \
-		-name "defect_insertion_L${L}_*.json" \
-		! -name "*_FAILED.json" \
+		-name "defect_insertion_L${L}_*.csv" \
 		-exec cp {} "../${RESULTS_DIR}/L${L}/" \; 2>/dev/null
-	count=$(find "../${RESULTS_DIR}/L${L}" -name '*.json' | wc -l)
+	count=$(find "../${RESULTS_DIR}/L${L}" -name '*.csv' | wc -l)
 	echo "  L=$L: $count files"
 done
 
 cd ..
-total_count=$(find "$RESULTS_DIR" -name '*.json' | wc -l)
+total_count=$(find "$RESULTS_DIR" -name '*.csv' | wc -l)
 echo "Total results collected: $total_count files"
 
 cd jobs
@@ -68,6 +67,6 @@ echo "  # Enter the wormhole code when prompted"
 echo ""
 echo "Then extract and analyze:"
 echo "  tar -xzf ${RESULTS_DIR}.tar.gz"
-echo "  julia defect_insertion_analyze.jl ${RESULTS_DIR}/L16/*.json ${RESULTS_DIR}/L24/*.json ${RESULTS_DIR}/L32/*.json"
+echo "  julia defect_insertion_analyze.jl ${RESULTS_DIR}/L16/*.csv ${RESULTS_DIR}/L24/*.csv ${RESULTS_DIR}/L32/*.csv"
 echo ""
 echo "Collection completed at: $(date)"
