@@ -1,15 +1,15 @@
 # HTCondor submit file for the reference-entropy diagnostic.
 universe              = vanilla
 executable            = run_reference_entropy.sh
-arguments             = $(L) $(lambda_x) $(lambda_zz) $(q) $(ntrials) $(T_max_factor) $(seed) $(out_prefix)
+arguments             = $(L) $(lambda_x) $(lambda_zz) $(q) $(ntrials) $(seed) $(sample) $(out_prefix)
 
 transfer_input_files  = ../Project.toml, ../Manifest.toml, ../lambda_scan_susceptibilities_itensorcorrelators.jl, ../reference_entropy_core.jl, ../reference_entropy_run.jl
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_output_files = output
 
-output                = logs/reference_entropy_L$(L)_q$(q).out
-error                 = logs/reference_entropy_L$(L)_q$(q).err
+output                = logs/reference_entropy_L$(L)_q$(q)_s$(sample).out
+error                 = logs/reference_entropy_L$(L)_q$(q)_s$(sample).err
 log                   = logs/reference_entropy_condor.log
 
 +JobDurationCategory = "Long"
@@ -18,4 +18,4 @@ request_memory        = 8GB
 request_disk          = 8 GB
 container_image       = /ospool/ap40/data/qia.wang/container.sif
 
-queue L lambda_x lambda_zz q ntrials T_max_factor seed out_prefix from params_reference_entropy.txt
+queue L lambda_x lambda_zz q ntrials seed sample out_prefix from params_reference_entropy.txt

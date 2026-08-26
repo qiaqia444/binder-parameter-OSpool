@@ -36,7 +36,7 @@ function parse_args_reference_entropy()
         "--ntrials"; arg_type=Int; default=50
         "--maxdim"; arg_type=Int; default=256
         "--cutoff"; arg_type=Float64; default=1e-12
-        "--T_max_factor"; arg_type=Int; default=4
+        "--T_max_factor"; arg_type=Int; default=2  # T_max = 2L, matches the right_boundary baseline convention
         "--save_every"; arg_type=Int; default=0  # 0 => auto: max(1, L/8)
         "--seed"; arg_type=Int; default=42
         "--output_dir"; arg_type=String; default="reference_entropy_results"

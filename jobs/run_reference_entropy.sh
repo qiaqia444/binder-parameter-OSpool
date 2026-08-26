@@ -7,14 +7,14 @@ lambda_x=$2
 lambda_zz=$3
 q=$4
 ntrials=$5
-T_max_factor=$6
-seed=$7
+seed=$6
+sample=$7
 out_prefix=$8
 
 echo "=== Reference Entropy Job Start ==="
 echo "Job started at: $(date)"
 echo "Running on: $(hostname)"
-echo "Parameters: L=$L lambda_x=$lambda_x lambda_zz=$lambda_zz q=$q ntrials=$ntrials T_max_factor=$T_max_factor seed=$seed"
+echo "Parameters: L=$L lambda_x=$lambda_x lambda_zz=$lambda_zz q=$q ntrials=$ntrials seed=$seed sample=$sample"
 echo "Working directory: $(pwd)"
 
 echo "Available files:"
@@ -35,7 +35,7 @@ echo "Setting up Julia environment..."
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
 echo "Running reference-entropy diagnostic..."
-echo "Command: julia --project=. reference_entropy_run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --q $q --ntrials $ntrials --T_max_factor $T_max_factor --seed $seed --output_dir output --output_file ${out_prefix}.csv"
+echo "Command: julia --project=. reference_entropy_run.jl --L $L --lambda_x $lambda_x --lambda_zz $lambda_zz --q $q --ntrials $ntrials --seed $seed --output_dir output --output_file ${out_prefix}.csv"
 
 julia --project=. reference_entropy_run.jl \
     --L "$L" \
@@ -43,7 +43,6 @@ julia --project=. reference_entropy_run.jl \
     --lambda_zz "$lambda_zz" \
     --q "$q" \
     --ntrials "$ntrials" \
-    --T_max_factor "$T_max_factor" \
     --seed "$seed" \
     --output_dir output \
     --output_file "${out_prefix}.csv"
