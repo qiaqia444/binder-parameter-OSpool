@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Collect and organize reference-entropy diagnostic results.
+# Run this script after all HTCondor jobs complete.
+
+echo "=== Reference Entropy Results Collection ==="
+echo "Starting collection at: $(date)"
+
+TIMESTAMP=$(date +%Y%m%d_%H%M)
+RESULTS_DIR="reference_entropy_results_${TIMESTAMP}"
+echo "Creating results directory: $RESULTS_DIR"
+mkdir -p "$RESULTS_DIR"
+
+cd jobs
+if [ ! -d "output" ]; then
+	echo "ERROR: No output directory found. Jobs may not have completed yet."
+	exit 1
+fi
+
+echo "Found $(find output -maxdepth 1 -name '*.csv' | wc -l) result files"
+find output -maxdepth 1 -name "reference_entropy_*.csv" -exec cp {} "../${RESULTS_DIR}/" \; 2>/dev/null
+
+cd ..
+total_count=$(find "$RESULTS_DIR" -name '*.csv' | wc -l)
+echo "Total results collected: $total_count files"
+
+cd jobs
+failure_count=$(find output -maxdepth 1 -name 'reference_entropy_*_FAILED.json' | wc -l)
+if [ "$failure_count" -gt 0 ]; then
+	echo "WARNING: Found $failure_count failed jobs"
+	mkdir -p "../${RESULTS_DIR}/failed"
+	cp output/reference_entropy_*_FAILED.json "../${RESULTS_DIR}/failed/" 2>/dev/null || true
+else
+	echo "No failed jobs detected"
+fi
+cd ..
+
+echo "Creating compressed archive..."
+tar -czf "${RESULTS_DIR}.tar.gz" "$RESULTS_DIR"
+ARCHIVE_SIZE=$(du -h "${RESULTS_DIR}.tar.gz" | cut -f1)
+
+echo ""
+echo "=== Collection Summary ==="
+echo "Results directory: $RESULTS_DIR"
+echo "Archive: ${RESULTS_DIR}.tar.gz"
+echo "Archive size: $ARCHIVE_SIZE"
+echo "Total files: $total_count"
+echo "Failed jobs: $failure_count"
+echo ""
+echo "=== Transfer to Mac with Magic Wormhole ==="
+echo "On cluster, run:"
+echo "  wormhole send ${RESULTS_DIR}.tar.gz"
+echo ""
+echo "On your Mac, run:"
+echo "  wormhole receive"
+echo "  # Enter the wormhole code when prompted"
+echo ""
+echo "Then extract and analyze:"
+echo "  tar -xzf ${RESULTS_DIR}.tar.gz"
+echo "  julia reference_entropy_analyze.jl ${RESULTS_DIR}/*.csv"
+echo ""
+echo "Collection completed at: $(date)"
