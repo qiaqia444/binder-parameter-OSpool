@@ -21,7 +21,7 @@ function load_results(results_dir)
 
     rows = Dict{String,Any}[]
 
-    for L in [8, 16, 24, 32, 40]
+    for L in [8, 16, 24, 32, 40, 48, 56]
         L_dir = joinpath(results_dir, "L$L")
 
         if !isdir(L_dir)
