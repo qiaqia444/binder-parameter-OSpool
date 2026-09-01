@@ -14,6 +14,10 @@ not change the seeds/output filenames of any other right-boundary family.
 
 Scans: P_x = P_zz from 0.38 to 0.45 in steps of 0.01 (8 points)
 Fixed: λ_x = 0.7 (X measurement strength), λ_zz = 0.0 (no ZZ measurements)
+
+n_samples/ntrials split to 160x25 (was 40x100) to make more, smaller jobs -
+same 4000 total trials per (L,q) point - matching request_cpus=2 (was 4) in
+jobs_right_boundary_L48_L56.submit, so more jobs can run concurrently.
 """
 
 using Printf
@@ -29,10 +33,10 @@ lambda_zz = 0.0  # No ZZ measurements
 P_values = collect(0.38:0.01:0.45)
 
 # Number of samples per configuration (for error bars)
-n_samples = 40  # More jobs for faster parallelization
+n_samples = 160  # More, smaller jobs so more can run concurrently at request_cpus=2
 
 # Number of trials per job
-ntrials = 100  # Faster jobs, same total statistics (40×100=4000)
+ntrials = 25  # Same total statistics as before (160×25=4000)
 
 # Starting seed (kept disjoint from other families; see repo memory registry)
 seed_start = 150001

@@ -380,23 +380,27 @@ function rb_renyi2_binder_one_trajectory(
     L::Int;
     maxdim::Int,
     cutoff::Float64,
-    norm_tol::Float64=1e-14,
 )
     Q = rb_build_replica_overlap_mpo(sites, L)
 
+    # Tr(rho^2) legitimately underflows a fixed absolute threshold at large L
+    # (~2^-L for a near-maximally-mixed state) - only reject non-positive or
+    # non-finite norms, never a small-but-physical positive value.
     hs_norm = rb_hilbert_schmidt_norm(rho)
-    if !isfinite(hs_norm) || hs_norm <= norm_tol
+    if !isfinite(hs_norm) || hs_norm <= 0.0
         error("Invalid doubled-state norm: <rho|rho> = $hs_norm")
     end
 
-    psi1 = apply(Q, rho; cutoff=cutoff, maxdim=maxdim)
+    # Normalize before applying Q (numerically better-conditioned than
+    # applying to the unnormalized state and dividing at the end); this is
+    # mathematically identical to the original normalized definition.
+    rho_obs = rho * (1.0 / sqrt(hs_norm))
+
+    psi1 = apply(Q, rho_obs; cutoff=cutoff, maxdim=maxdim)
     psi2 = apply(Q, psi1; cutoff=cutoff, maxdim=maxdim)
 
-    numerator_2 = real(inner(psi1, psi1))
-    numerator_4 = real(inner(psi2, psi2))
-
-    M2 = numerator_2 / (L^2 * hs_norm)
-    M4 = numerator_4 / (L^4 * hs_norm)
+    M2 = real(inner(psi1, psi1)) / L^2
+    M4 = real(inner(psi2, psi2)) / L^4
     B2 = rb_binder_from_moments(M2, M4)
 
     return (M2=M2, M4=M4, B2=B2, purity=hs_norm)
@@ -477,16 +481,20 @@ function rb_run_right_edge_point(
             cutoff=cutoff, seed=trial_seed,
         )
 
+        cross_site_dims[trial] = evolved.max_interphysical_linkdim
+        trace_errors[trial] = evolved.max_trace_error
+
+        # rb_renyi2_binder_one_trajectory no longer rejects small-but-physical
+        # purities (see its docstring/comment), so a thrown error here means a
+        # genuine bug or a truly invalid (non-positive/non-finite) norm - let
+        # it propagate instead of silently converting it to NaN.
         observable = rb_renyi2_binder_one_trajectory(
             evolved.rho, evolved.sites, L; maxdim=obs_maxdim, cutoff=obs_cutoff,
         )
-
         M2s[trial] = observable.M2
         M4s[trial] = observable.M4
         B2s[trial] = observable.B2
         purities[trial] = observable.purity
-        cross_site_dims[trial] = evolved.max_interphysical_linkdim
-        trace_errors[trial] = evolved.max_trace_error
     end
 
     valid = [

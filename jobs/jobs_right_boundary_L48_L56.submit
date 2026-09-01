@@ -1,11 +1,12 @@
 # HTCondor submit file for Right Boundary Scan: L=48,56 near-critical zoom
 # Same physics as jobs_right_boundary.submit (standard initial state, NOT GHZ),
-# reuses the existing run_right_boundary.sh / run_right_boundary_scan.jl /
-# renyi2_right_boundary_core.jl - only the params file differs
-# (L=48,56 only, q=0.38:0.01:0.45 only).
+# reuses renyi2_right_boundary_core.jl / run_right_boundary_scan.jl - only the
+# params file differs (L=48,56 only, q=0.38:0.01:0.45 only) and a dedicated
+# run_right_boundary_L48_L56.sh sets JULIA_NUM_THREADS=2 to match
+# request_cpus=2 below (more, smaller jobs instead of fewer, wider ones).
 
 universe              = vanilla
-executable            = run_right_boundary.sh
+executable            = run_right_boundary_L48_L56.sh
 arguments             = $(L) $(lambda_x) $(lambda_zz) $(P_x) $(P_zz) $(ntrials) $(seed) $(sample) $(out_prefix)
 
 # Send only what the job needs
@@ -22,8 +23,10 @@ log                   = logs/right_boundary_L48_L56_condor.log
 
 +JobDurationCategory = "Long"
 
-# Resources (same as base/L40 - maxdim is fixed regardless of L, so memory/disk stay the same)
-request_cpus          = 4
+# Resources (fewer cpus per job than base/L40's 4, so more jobs can run
+# concurrently - see the smaller ntrials/larger n_samples split in
+# make_params_right_boundary_L48_L56.jl)
+request_cpus          = 2
 request_memory        = 8GB
 request_disk          = 8 GB
 
