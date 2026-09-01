@@ -22,11 +22,10 @@ log                   = logs/right_boundary_L48_L56_condor.log
 
 +JobDurationCategory = "Long"
 
-# Resources (L=48,56 are the largest sizes in this family so far - bumped up
-# from the base/L40 8GB/8GB in case bond-dimension growth needs more headroom)
+# Resources (same as base/L40 - maxdim is fixed regardless of L, so memory/disk stay the same)
 request_cpus          = 4
-request_memory        = 16GB
-request_disk          = 12 GB
+request_memory        = 8GB
+request_disk          = 8 GB
 
 # Use your working container
 container_image = /ospool/ap40/data/qia.wang/container.sif
