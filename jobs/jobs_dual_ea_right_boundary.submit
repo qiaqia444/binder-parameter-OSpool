@@ -1,0 +1,32 @@
+# HTCondor submit file for Right Boundary dual EA Binder Scan
+# Same dynamics as the Renyi-2 right-boundary family (renyi2_right_boundary_core.jl);
+# observable = dual Edwards-Anderson Binder (dual_ea_right_boundary_core.jl)
+
+universe              = vanilla
+executable            = run_dual_ea_right_boundary.sh
+arguments             = $(L) $(lambda_x) $(lambda_zz) $(P_x) $(P_zz) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs (the dual-EA core includes renyi2_right_boundary_core.jl)
+transfer_input_files  = ../Project.toml, ../Manifest.toml, ../renyi2_right_boundary_core.jl, ../dual_ea_right_boundary_core.jl, ../run_dual_ea_right_boundary_scan.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/dual_ea_right_boundary_L$(L)_Px$(P_x)_s$(sample).out
+error                 = logs/dual_ea_right_boundary_L$(L)_Px$(P_x)_s$(sample).err
+log                   = logs/dual_ea_right_boundary_condor.log
+
++JobDurationCategory = "Long"
+
+# Resources (same as the Renyi-2 base family)
+request_cpus          = 2
+request_memory        = 8GB
+request_disk          = 8 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# One job per line in params_dual_ea_right_boundary.txt
+queue L lambda_x lambda_zz P_x P_zz ntrials seed sample out_prefix from params_dual_ea_right_boundary.txt

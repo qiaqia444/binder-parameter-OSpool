@@ -1,0 +1,32 @@
+# HTCondor submit file for Right Boundary dual EA Binder Scan: L=40 extension
+# Same physics/resources as jobs_dual_ea_right_boundary.submit and the same
+# run_dual_ea_right_boundary.sh - only the params file differs (L=40 only).
+
+universe              = vanilla
+executable            = run_dual_ea_right_boundary.sh
+arguments             = $(L) $(lambda_x) $(lambda_zz) $(P_x) $(P_zz) $(ntrials) $(seed) $(sample) $(out_prefix)
+
+# Send only what the job needs (the dual-EA core includes renyi2_right_boundary_core.jl)
+transfer_input_files  = ../Project.toml, ../Manifest.toml, ../renyi2_right_boundary_core.jl, ../dual_ea_right_boundary_core.jl, ../run_dual_ea_right_boundary_scan.jl
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = output
+
+# Logs (on submit node)
+output                = logs/dual_ea_right_boundary_L$(L)_Px$(P_x)_s$(sample).out
+error                 = logs/dual_ea_right_boundary_L$(L)_Px$(P_x)_s$(sample).err
+log                   = logs/dual_ea_right_boundary_L40_condor.log
+
++JobDurationCategory = "Long"
+
+# Resources (L=40 needs more memory/time than the smaller sizes)
+request_cpus          = 2
+request_memory        = 8GB
+request_disk          = 8 GB
+
+# Use your working container
+container_image = /ospool/ap40/data/qia.wang/container.sif
+
+# One job per line in params_dual_ea_right_boundary_L40.txt
+queue L lambda_x lambda_zz P_x P_zz ntrials seed sample out_prefix from params_dual_ea_right_boundary_L40.txt
