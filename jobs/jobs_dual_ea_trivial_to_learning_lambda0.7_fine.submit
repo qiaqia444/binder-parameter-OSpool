@@ -1,13 +1,12 @@
 # HTCondor submit file for Trivial-to-Learning (lambda = 0.7) dual EA Binder Scan:
 # FINE q grid 0.05:0.005:0.10 (lambda_x = 0.49, lambda_zz = 0.21)
-# Same physics, driver and params layout as jobs_dual_ea_trivial_to_learning_lambda0.7.submit,
-# but with its own run script (run_dual_ea_trivial_to_learning_lambda0.7_fine.sh, 2 threads to
-# match request_cpus = 2). Only the params file and the CPU count differ
+# Same physics, resources and run script (run_dual_ea_trivial_to_learning_lambda0.7.sh) as
+# jobs_dual_ea_trivial_to_learning_lambda0.7.submit - only the params file differs
 # (L = 16, 24, 32, 40 at q = 0.05:0.005:0.10). Output files are named
 # dual_ea_trivial_to_learning_lambda0.7_fine_*.
 
 universe              = vanilla
-executable            = run_dual_ea_trivial_to_learning_lambda0.7_fine.sh
+executable            = run_dual_ea_trivial_to_learning_lambda0.7.sh
 arguments             = $(L) $(lambda_x) $(lambda_zz) $(P_x) $(P_zz) $(ntrials) $(seed) $(sample) $(out_prefix)
 
 # Send only what the job needs (the dual-EA cores include the right-boundary Renyi-2 core
@@ -25,10 +24,8 @@ log                   = logs/dual_ea_trivial_to_learning_lambda0.7_fine_condor.l
 
 +JobDurationCategory = "Long"
 
-# Resources: 2 CPUs (the coarse trivial-to-learning family uses 4); the dedicated
-# run_dual_ea_trivial_to_learning_lambda0.7_fine.sh sets the thread counts to 2 to match.
-# Both weak layers are active, so keep 8GB.
-request_cpus          = 2
+# Resources (same as the coarse trivial-to-learning family: both weak layers active)
+request_cpus          = 4
 request_memory        = 8GB
 request_disk          = 8 GB
 
