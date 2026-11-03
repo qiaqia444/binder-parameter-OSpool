@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# HTCondor job script for the right boundary dual EA Binder scan: L=48,56 near-critical zoom
+# HTCondor job script for the right boundary dual EA Binder scan: L=48,56 extension
+# (used by both the coarse and the fine q-grid submit files).
 # Same as run_dual_ea_right_boundary.sh, except only 2 CPUs are requested/used and the
-# dynamics settings match run_right_boundary_L48_L56.sh (maxdim 512, cutoff 1e-13,
-# T_max_factor 4), so the trajectories are the same as the Renyi-2 L=48,56 jobs.
+# dynamics settings are maxdim 512, cutoff 1e-13, T_max_factor 4.
 # (No obs_* options: the dual-EA contraction is exact, with no truncation.)
 
 # Get individual arguments from HTCondor

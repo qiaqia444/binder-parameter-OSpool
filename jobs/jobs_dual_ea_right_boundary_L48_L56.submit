@@ -1,8 +1,11 @@
-# HTCondor submit file for Right Boundary dual EA Binder Scan: L=48,56 near-critical zoom
+# HTCondor submit file for Right Boundary dual EA Binder Scan: L=48,56 extension, union of coarse and fine q grids
+# One job per line of params_dual_ea_right_boundary_L48_L56.txt (each q simulated once):
+#   - q = 0, 0.05, 0.10, 0.15, 0.20, 0.40, 0.45, 0.50 -> output files dual_ea_right_boundary_L*       (2560 jobs)
+#   - q = 0.25:0.01:0.35                              -> output files dual_ea_right_boundary_fine_L*  (3520 jobs)
 # Same physics as jobs_dual_ea_right_boundary.submit; dedicated
-# run_dual_ea_right_boundary_L48_L56.sh sets maxdim=512 / cutoff=1e-13 (matching the
-# Renyi-2 L48/L56 family) and JULIA_NUM_THREADS=2 to match request_cpus=2 below
-# (more, smaller jobs instead of fewer, wider ones).
+# run_dual_ea_right_boundary_L48_L56.sh sets maxdim=512 / cutoff=1e-13 and
+# JULIA_NUM_THREADS=2 to match request_cpus=2 below (more, smaller jobs instead of fewer,
+# wider ones).
 
 universe              = vanilla
 executable            = run_dual_ea_right_boundary_L48_L56.sh
@@ -16,13 +19,13 @@ when_to_transfer_output = ON_EXIT
 transfer_output_files   = output
 
 # Logs (on submit node)
-output                = logs/dual_ea_right_boundary_L$(L)_Px$(P_x)_s$(sample).out
-error                 = logs/dual_ea_right_boundary_L$(L)_Px$(P_x)_s$(sample).err
+output                = logs/$(out_prefix).out
+error                 = logs/$(out_prefix).err
 log                   = logs/dual_ea_right_boundary_L48_L56_condor.log
 
 +JobDurationCategory = "Long"
 
-# Resources (same as the Renyi-2 L48/L56 family: 2 cpus, 8GB)
+# Resources (2 cpus, 8GB)
 request_cpus          = 2
 request_memory        = 8GB
 request_disk          = 8 GB
