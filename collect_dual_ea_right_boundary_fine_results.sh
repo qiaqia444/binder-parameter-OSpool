@@ -15,7 +15,7 @@ RESULTS_DIR="dual_ea_right_boundary_fine_results_${TIMESTAMP}"
 echo "Creating results directory: $RESULTS_DIR"
 mkdir -p "$RESULTS_DIR"
 
-SIZES="16 24 32 40 48 56"
+SIZES="16 24 32 40"
 
 # Create subdirectories for each system size
 for L in $SIZES; do
@@ -44,7 +44,7 @@ done
 # Count total results
 cd ..
 total_count=$(find "$RESULTS_DIR" -name "*.json" | wc -l)
-echo "Total results collected: $total_count files (expected 1760 per size: 11 q x 40 jobs for L=16..40, 11 q x 160 jobs for L=48,56)"
+echo "Total results collected: $total_count files (expected 1760 = 4 sizes x 11 q x 40 jobs)"
 
 # Check for failures
 cd jobs
